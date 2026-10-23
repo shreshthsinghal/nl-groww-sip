@@ -96,6 +96,7 @@ export default function Companion() {
     anon.current = anonId();
     try { setBig(localStorage.getItem("sipc-big") === "1"); setSnd(localStorage.getItem("sipc-snd") === "1"); } catch {}
     sb().from("eval_runs").select("created_at,passed,full_pass,n,unsafe_shown,needless_fallback,answerable,intent_ok,model").order("created_at", { ascending: false }).limit(1).then(({ data }) => { if (data && data[0]) setEvalRun(data[0]); }, () => {});
+    fetch("/api/companion").then((r) => r.json()).then((j) => setLive(j.live ? "on" : "off"), () => setLive("off"));
     logEvent("load", { moment: "F4" });
   }, []);
   useEffect(() => { const el = scrollRef.current; if (el) el.scrollTop = el.scrollHeight; }, [chat, busy]);
@@ -216,7 +217,7 @@ export default function Companion() {
   const chips = (pristine ? [sc.msg] : []).concat((MOMENTS.find((m) => m.id === momentId) || { more: [] }).more).filter((t) => !asked[t]);
   const pill = sip.status === "FAILED" ? ["bad", "Instalment missed"] : sip.status === "PAUSED" ? ["warn", "Paused"] : sip.status === "CANCELLED" ? ["bad", "Cancelled"] : sip.status === "STOPPED" ? ["idle", "Stopped"] : ["ok", "On track"];
   const nMiss = Math.min(3, sip.consecutive_failures || 0);
-  const liveLabel = forceRec ? "Recorded" : live === "off" ? "Safe replies" : "Live AI";
+  const liveLabel = forceRec ? "Recorded" : live === "off" ? "Safe replies" : live === "on" ? "Live AI" : "Checking…";
 
   return (
     <div className="page" style={{ gap: 22 }}>
@@ -327,8 +328,8 @@ export default function Companion() {
           <div className="side">
             <div className="cpanel">
               <p className="eyebrow">Under the hood</p>
-              <div className="src"><span className={"pill " + (forceRec ? "idle" : live === "off" ? "warn" : "ok")}>{forceRec ? "Recorded mode" : live === "off" ? "Live AI off" : "Live AI on"}</span>
-                <span className="note">{forceRec ? "Replies are real AI outputs from eval run 2, replayed and checked again." : live === "off" ? "The server has no AI key yet, so every answer is the safe reply." : "Each reply is generated on the server, then checked before you see it."}</span></div>
+              <div className="src"><span className={"pill " + (forceRec || live === "unknown" ? "idle" : live === "off" ? "warn" : "ok")}>{forceRec ? "Recorded mode" : live === "off" ? "Live AI off" : live === "on" ? "Live AI on" : "Checking…"}</span>
+                <span className="note">{forceRec ? "Replies are real AI outputs from eval run 2, replayed and checked again." : live === "off" ? "The server has no AI key yet, so every answer is the safe reply. Switch on recorded replies to see real AI answers from the eval run." : "Each reply is generated on the server, then checked before you see it."}</span></div>
               <label className="toggle"><input type="checkbox" checked={forceRec} onChange={(e) => setForceRec(e.target.checked)} /> Use recorded replies from the eval run instead</label>
             </div>
             <div className="cpanel">

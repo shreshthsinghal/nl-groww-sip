@@ -27,6 +27,10 @@ function cleanEvent(e) {
   return ev;
 }
 
+export async function GET() {
+  return Response.json({ live: hasKey(), model: hasKey() ? MODEL : null });
+}
+
 export async function POST(req) {
   if (rateLimited(req, "companion", 20)) return Response.json({ error: "rate_limited" }, { status: 429 });
   let body; try { body = await req.json(); } catch { return Response.json({ error: "bad_request" }, { status: 400 }); }
