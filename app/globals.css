@@ -102,3 +102,31 @@ tr:last-child td{border-bottom:none}
 .footer{border-top:1px solid var(--rule);padding:24px var(--gutR) 40px var(--gut);font-size:.84rem;color:var(--faint)}
 .footer div{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 20px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* home: two doors */
+.home{max-width:1080px;margin:0 auto;padding:clamp(40px,8vw,96px) var(--gutR) 64px var(--gut);display:flex;flex-direction:column;gap:40px}
+.home-hero{display:flex;flex-direction:column;gap:18px;max-width:760px}
+.home-hero h1{font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.02;letter-spacing:-.02em}
+.home-hero p{margin:0;font-size:1.15rem;color:var(--pencil);max-width:58ch}
+.doors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:720px){.doors{grid-template-columns:1fr}}
+.door{position:relative;display:flex;flex-direction:column;gap:10px;min-height:220px;padding:26px 26px 24px;border-radius:24px;background:var(--surface);border:1px solid var(--rule);color:var(--ink);text-decoration:none;transition:border-color .15s,transform .15s}
+.door:hover{border-color:var(--stamp);transform:translateY(-2px)}
+.door.primary{background:var(--stamp);border-color:var(--stamp);color:var(--on-stamp)}
+.door-k{font-weight:700;font-size:.9rem;opacity:.75}
+.door b{font-family:var(--display);font-weight:500;font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.12;max-width:20ch;margin-top:auto}
+.door span:not(.door-k){font-size:.95rem;opacity:.8}
+.door svg{position:absolute;top:24px;right:24px}
+.home-foot{margin:0;color:var(--faint);font-size:.92rem}
+.built{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-top:1px solid var(--rule)}
+.built a{display:flex;flex-direction:column;gap:4px;padding:18px 4px;border-bottom:1px solid var(--rule);text-decoration:none;color:var(--ink)}
+.built a:hover b{color:var(--stamp)}
+.built b{font-size:1.1rem}
+.built span{color:var(--pencil);font-size:.95rem}
+
+@media (max-width:520px){
+  .topbar-in{flex-wrap:nowrap;gap:10px;min-height:52px}
+  .brand{font-size:0;gap:0}.brand i{width:14px;height:14px}
+  .nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:0}
+  .nav a{font-size:.86rem;padding:7px 11px;white-space:nowrap}
+}

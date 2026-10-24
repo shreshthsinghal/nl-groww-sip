@@ -2,17 +2,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const LINKS = [["/", "Overview"], ["/engine", "Discovery engine"], ["/companion", "Companion MVP"], ["/eval", "Quality gate"], ["/metrics", "Live metrics"]];
+const LINKS = [["/engine/index.html", "Engine", true], ["/companion", "Companion"], ["/built", "How it's built"]];
+const BUILT = ["/built", "/lab", "/eval", "/metrics"];
 
 export default function Nav() {
   const p = usePathname();
   return (
     <header className="topbar"><div className="topbar-in">
-      <Link className="brand" href="/"><i aria-hidden="true" />SIP Continuation</Link>
+      <Link className="brand" href="/" aria-label="SIP Continuation home"><i aria-hidden="true" />SIP Continuation</Link>
       <nav className="nav" aria-label="Main">
-        {LINKS.map(([h, l]) => h === "/engine"
-          ? <a key={h} href="/engine/index.html">{l}</a>
-          : <Link key={h} href={h} aria-current={p === h ? "page" : undefined}>{l}</Link>)}
+        {LINKS.map(([h, l, raw]) => {
+          const cur = h === "/built" ? BUILT.includes(p) : p === h;
+          return raw ? <a key={h} href={h}>{l}</a> : <Link key={h} href={h} aria-current={cur ? "page" : undefined}>{l}</Link>;
+        })}
       </nav>
     </div></header>
   );

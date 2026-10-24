@@ -1,5 +1,6 @@
 import "./globals.css";
 import "./companion/companion.css";
+import "./companion/app.css";
 import Nav from "@/components/Nav";
 
 export const metadata = {
@@ -21,8 +22,7 @@ export default function RootLayout({ children }) {
         <Nav />
         <main id="main" tabIndex={-1}>{children}</main>
         <footer className="footer"><div>
-          <span>An independent product case study about Groww. Not affiliated with or endorsed by Groww.</span>
-          <span>Sample data only. Information, not investment advice. Learn more at <a href="https://investor.sebi.gov.in" target="_blank" rel="noopener">investor.sebi.gov.in</a></span>
+          <span>A product case study about Groww, not affiliated with Groww. Sample data only. Information, not investment advice: <a href="https://investor.sebi.gov.in" target="_blank" rel="noopener">investor.sebi.gov.in</a></span>
         </div></footer>
       </body>
     </html>
