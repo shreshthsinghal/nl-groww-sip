@@ -1,6 +1,7 @@
 import "./globals.css";
 import "./companion/companion.css";
 import "./companion/app.css";
+import "./engine/engine.css";
 import Nav from "@/components/Nav";
 
 export const metadata = {

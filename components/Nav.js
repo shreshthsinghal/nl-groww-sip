@@ -2,8 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const LINKS = [["/engine/index.html", "Engine", true], ["/companion", "Companion"], ["/built", "How it's built"]];
-const BUILT = ["/built", "/lab", "/eval", "/metrics"];
+const LINKS = [["/engine", "Engine"], ["/companion", "Companion"], ["/built", "How it's built"]];
+const BUILT = ["/built", "/lab", "/eval", "/metrics", "/research"];
 
 export default function Nav() {
   const p = usePathname();
@@ -13,7 +13,7 @@ export default function Nav() {
       <nav className="nav" aria-label="Main">
         {LINKS.map(([h, l, raw]) => {
           const cur = h === "/built" ? BUILT.includes(p) : p === h;
-          return raw ? <a key={h} href={h}>{l}</a> : <Link key={h} href={h} aria-current={cur ? "page" : undefined}>{l}</Link>;
+          return <Link key={h} href={h} aria-current={cur ? "page" : undefined}>{l}</Link>;
         })}
       </nav>
     </div></header>

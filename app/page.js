@@ -9,12 +9,12 @@ export default function Home() {
         <p>Many first SIPs end without anyone deciding to stop them. A payment fails, then another, and the third cancels the SIP. These two tools help you see it coming and fix it.</p>
       </section>
       <div className="doors">
-        <a className="door" href="/engine/index.html">
+        <Link className="door" href="/engine">
           <span className="door-k">Discovery engine</span>
           <b>Find out why SIPs like yours stop</b>
-          <span>Built from 19,005 real investor posts and reviews.</span>
+          <span>450 first-hand stories, drawn from 19,005 public posts.</span>
           <ArrowUpRight size={22} aria-hidden="true" />
-        </a>
+        </Link>
         <Link className="door primary" href="/companion">
           <span className="door-k">Companion</span>
           <b>See what happened to a missed instalment, and fix it</b>
