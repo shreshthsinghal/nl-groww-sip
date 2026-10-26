@@ -24,10 +24,10 @@ export default function Design() {
         {TABS.map((x) => <button key={x.id} className="tab" role="tab" type="button" aria-selected={tab === x.id} onClick={() => setTab(x.id)}>{x.label}</button>)}
       </div>
       <p className="note" style={{ margin: 0 }}>{t.note}</p>
-      <div className="figma-frame">
+      <div className={"figma-frame" + (tab === "file" ? "" : " proto")}>
         <iframe key={t.id} title={t.label} src={embed(t.url)} allowFullScreen loading="lazy" />
       </div>
-      <p className="note" style={{ margin: 0 }}><a href={tab === "file" ? FILE : t.url} target="_blank" rel="noopener">Open in Figma <ArrowUpRight size={14} aria-hidden="true" style={{ verticalAlign: "-2px" }} /></a> · If the frame stays blank, the file hasn't been shared publicly yet.</p>
+      <p className="note" style={{ margin: 0 }}><a href={tab === "file" ? FILE : t.url} target="_blank" rel="noopener">Open in Figma <ArrowUpRight size={14} aria-hidden="true" style={{ verticalAlign: "-2px" }} /></a> · Prototypes are tappable right here.</p>
     </div>
   );
 }
