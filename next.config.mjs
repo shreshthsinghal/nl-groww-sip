@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() { return [{ source: "/research", destination: "/research/index.html" }]; },
+  async rewrites() { return [{ source: "/research-v1", destination: "/research-v1/index.html" }]; },
   async redirects() { return [{ source: "/engine/index.html", destination: "/engine", permanent: false }]; },
   async headers() {
     return [{ source: "/(.*)", headers: [

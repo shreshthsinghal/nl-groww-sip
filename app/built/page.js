@@ -11,7 +11,7 @@ async function latestEval() {
 export default async function Built() {
   const ev = await latestEval();
   const rows = [
-    ["/research", "Research view of the engine", "How 19,005 posts were classified, ranked and checked against human labels three times.", true],
+    ["/research", "Research workspace", "For the product team: the ranked leaks, all 450 stories with filters, an ask box that cites its sources, a classifier for new feedback, and the method.", true],
     ["/design", "Design in Figma", "Clickable prototypes of the Companion and the Engine, and the design file with tokens, components and every screen state."],
     ["/eval", "Quality gate", ev ? `Latest live run: ${ev.full_pass}/${ev.n} scenarios passed, ${ev.passed ? "shipped" : "held"}.` : "27 locked scenarios. A release ships only if it passes them on the live model."],
     ["/lab", "Companion lab", "Every reply's safety checks, recorded and live modes, and the console for moderated user tests."],

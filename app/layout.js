@@ -2,6 +2,7 @@ import "./globals.css";
 import "./companion/companion.css";
 import "./companion/app.css";
 import "./engine/engine.css";
+import "./research/research.css";
 import Nav from "@/components/Nav";
 
 export const metadata = {
