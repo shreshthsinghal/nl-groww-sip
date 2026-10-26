@@ -12,11 +12,12 @@ export const viewport = { width: "device-width", initialScale: 1, viewportFit: "
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" />
+        <script dangerouslySetInnerHTML={{ __html: "try{var t=localStorage.getItem('sipc-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}" }} />
       </head>
       <body>
         <a className="skip" href="#main">Skip to content</a>

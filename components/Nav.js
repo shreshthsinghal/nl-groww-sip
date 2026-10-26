@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ThemeToggle from "./ThemeToggle";
 
 const LINKS = [["/engine", "Engine"], ["/companion", "Companion"], ["/built", "How it's built"]];
-const BUILT = ["/built", "/lab", "/eval", "/metrics", "/research"];
+const BUILT = ["/built", "/lab", "/eval", "/metrics", "/research", "/design"];
 
 export default function Nav() {
   const p = usePathname();
@@ -16,6 +17,7 @@ export default function Nav() {
           return <Link key={h} href={h} aria-current={cur ? "page" : undefined}>{l}</Link>;
         })}
       </nav>
+      <ThemeToggle />
     </div></header>
   );
 }

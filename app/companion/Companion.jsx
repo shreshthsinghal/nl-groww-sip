@@ -278,7 +278,7 @@ export default function Companion() {
         <select id="ap-sit" value={sid} onChange={(e) => load(e.target.value)}>
           {SITUATIONS.map(([id, t]) => <option key={id} value={id}>{t}</option>)}
         </select>
-        <p>A working prototype with sample data. Nothing real is paid or changed.</p>
+        <p>A working prototype with sample data. Nothing real is paid or changed. <a href="/design">See the design in Figma</a>.</p>
       </aside>
     </div>
   );
