@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUpRight, Search, X, Download } from "lucide-react";
+import { ArrowUpRight, X, Download, ListOrdered, Layers, BookOpen, MessageSquareText, Tags, FileJson, FileSpreadsheet } from "lucide-react";
 import R from "@/lib/research.json";
 import { keywordPattern } from "@/lib/patterns";
 import { sb } from "@/lib/supabase";
@@ -9,10 +9,23 @@ const D = {
   PAY: "Payment failure", STOP: "Decides to stop", EXPECT: "Expectation gap", AMOUNT: "Amount vs cash", PAUSE: "Skip or pause",
   TRUST: "Platform trust", CONFUSE: "Confusing screens", OUTSIDE: "Asks outside the app", KEEP: "Kept going", OTHER: "Other"
 };
-const SRC = { RD: "Reddit", AS: "App Store", PS: "Play Store", YT: "YouTube", TQ: "TradingQ&A" };
+const SRC = { RD: "Reddit", TQ: "TradingQ&A", YT: "YouTube", PS: "Play Store", AS: "App Store" };
 const STAGE = { ONBOARD: "Setting up", EARLY: "First 6 months", LATER: "After 6 months", UNKNOWN: "Stage unknown" };
 const EMO = { ANXIOUS: "Anxious", DISAPPOINTED: "Disappointed", ANGRY: "Angry", CONFUSED: "Confused", CALM: "Calm", POSITIVE: "Positive" };
-const TABS = [["overview", "Overview"], ["evidence", "Evidence"], ["ask", "Ask"], ["classify", "Classify"], ["method", "Method"]];
+const SEG = { SALARIED: "Salaried", IRREGULAR_INCOME: "Irregular income", STUDENT: "Student", FAMILY_MONEY: "Family money", INFLUENCER_LED: "Started via a creator", TIER2_HINT: "Outside a metro" };
+const RANKED = ["PAY", "STOP", "EXPECT", "AMOUNT", "PAUSE", "TRUST", "CONFUSE", "OUTSIDE"];
+const W = Object.fromEntries(R.ranking.map((r) => [r.driver, { exit: r.exit, addr: r.addr }]));
+const META = {
+  PAY: { t: "Payments fail, and nobody explains why", d: "An instalment, mandate or autopay fails or is rejected. The reason, the fix and how close the SIP is to cancelling stay unclear.", q: "What would a first-timer need to see on the day a debit fails to fix it before the next one?", ex: "Three misses in a row cancel the SIP automatically.", ad: "Status, reasons, retries and the debit date are inside the app." },
+  STOP: { t: "A decision to stop, made alone", d: "The investor cancels, redeems or exits, often without seeing a smaller step such as lowering the amount or pausing.", q: "Which alternatives were visible at the moment they decided to stop?", ex: "Ends the SIP directly.", ad: "Some reasons, like a goal reached or a fund switch, sit outside the product." },
+  EXPECT: { t: "Early red months break a 12% promise", d: "Returns in the first months are flat or red against a number set by friends, creators or calculators.", q: "Where did the expected number come from, and when did it first feel broken?", ex: "Often, but not always, leads to stopping.", ad: "The app shapes what is shown in year one, not what markets do." },
+  AMOUNT: { t: "The amount stops fitting the month", d: "A job loss, EMI or expense makes the instalment too big, and lowering it is hard or unclear.", q: "How do people try to lower a SIP, and where do they give up?", ex: "A tight month usually ends in a skip or a stop.", ad: "Amount, date and step-down are product decisions." },
+  PAUSE: { t: "A skip or pause with no way back", d: "They skip or pause to get through a month, then the restart is unclear or forgotten.", q: "Do paused SIPs restart on time, and what reminds people?", ex: "A pause that never restarts is an exit.", ad: "Pause length, return date and reminders are in the app." },
+  TRUST: { t: "Platform trust wobbles", d: "Units arrive late, statements don't match or a redemption is slow, and worry turns into suspicion of the platform.", q: "Does a trust scare change what people do with their SIP, or only how they feel?", ex: "Rarely ends a SIP on its own.", ad: "Mostly operations: allotment, registrar and bank timelines." },
+  CONFUSE: { t: "Numbers that move without a reason", d: "Screens show returns, mandate limits or totals the investor can't interpret.", q: "Which number on which screen first made them doubt the SIP?", ex: "Confusion feeds other exits more than it causes one.", ad: "Labels and explanations can change; the numbers can't." },
+  OUTSIDE: { t: "Asking strangers what to do", d: "Unsure, they post their SIP, months and losses on YouTube or Reddit and ask whether to stop.", q: "What answer were they looking for that the app didn't give them?", ex: "A signal of doubt rather than an exit.", ad: "The app can explain, but cannot give advice." }
+};
+const TABS = [["ranked", "Ranked areas", ListOrdered], ["sources", "Source breakdown", Layers], ["ask", "Ask the evidence", MessageSquareText], ["classify", "Classify feedback", Tags], ["method", "Methodology", BookOpen]];
 const BY_ID = Object.fromEntries(R.items.map((i) => [i.id, i]));
 const TOTAL = R.items.length;
 const PII = /\b[A-Z]{5}\d{4}[A-Z]\b|\b\d{10,18}\b/i;
@@ -21,160 +34,321 @@ const EXAMPLES = [
   "Sir 8 mahine se SIP chal rahi hai abhi bhi minus me hai, band kar du kya?",
   "I lost my job last month and want to reduce my SIP from 5000 to 1000 for a while, but the app only lets me skip or cancel"
 ];
-const fmtDate = (d) => { const p = d.split("-"); return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][+p[1] - 1] + " " + p[0]; };
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const fmtDate = (d) => { const a = d.startsWith("~"); const p = d.replace("~", "").split("-"); return (a ? "About " : "") + (p[1] ? MON[+p[1] - 1] + " " : "") + p[0] + (p[2] && !a ? "" : ""); };
+const yearOf = (d) => +d.replace("~", "").slice(0, 4);
+const YEARS = { "2026": "2026", "2025": "2025", "2024": "2024", "2023": "2023", old: "2022 and earlier" };
+const STAGES = { early: "Setting up or first 6 months", LATER: "After 6 months" };
+const NOF = { src: "", year: "", stage: "", strong: false };
+const pct = (x) => (x >= 10 ? x.toFixed(1) : x.toFixed(1)) + "%";
 function anonId() { try { let a = localStorage.getItem("sipc-anon"); if (!a) { a = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now(); localStorage.setItem("sipc-anon", a); } return a; } catch { return "anon-" + Date.now(); } }
 
 function Tag({ d, small }) { return <span className={"rs-tag" + (small ? " sm" : "")} data-d={d}><i aria-hidden="true" />{D[d] || d}</span>; }
 
+function applyFilters(f) {
+  return R.items.filter((i) => (!f.src || i.src === f.src)
+    && (!f.year || (f.year === "old" ? yearOf(i.date) <= 2022 : yearOf(i.date) === +f.year))
+    && (!f.stage || (f.stage === "early" ? (i.stage === "ONBOARD" || i.stage === "EARLY") : i.stage === f.stage))
+    && (!f.strong || i.evidence === "STRONG"));
+}
+function rankAreas(items) {
+  const ranked = items.filter((i) => RANKED.includes(i.driver)); const N = ranked.length;
+  const rows = RANKED.map((d) => {
+    const its = ranked.filter((i) => i.driver === d); const n = its.length;
+    const share = N ? (n / N) * 100 : 0; const strong = n ? its.filter((i) => i.evidence === "STRONG").length / n : 0;
+    const ev = 0.5 + 0.5 * strong; const score = share * W[d].exit * W[d].addr * ev;
+    const bySrc = {}; its.forEach((i) => { bySrc[i.src] = (bySrc[i.src] || 0) + 1; });
+    const early = n ? its.filter((i) => i.stage === "ONBOARD" || i.stage === "EARLY").length / n : 0;
+    return { d, n, share, strong, ev, score: Math.round(score * 10) / 10, bySrc, sources: Object.keys(bySrc).length, early, its };
+  }).sort((a, b) => b.score - a.score || b.n - a.n);
+  let last = null, rank = 0; rows.forEach((r, k) => { if (!last || r.score !== last.score) rank = k + 1; r.rank = rank; last = r; });
+  return { rows, N };
+}
+function count(list, key) { const m = {}; list.forEach((i) => { const v = i[key]; if (v) v.split(/[,;|]/).filter(Boolean).forEach((x) => { m[x] = (m[x] || 0) + 1; }); }); return Object.entries(m).sort((a, b) => b[1] - a[1]); }
+function download(name, type, body) { const u = URL.createObjectURL(new Blob([body], { type })); const a = document.createElement("a"); a.href = u; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(u), 1000); }
+const q = (x) => '"' + String(x ?? "").replace(/"/g, '""') + '"';
+
+function Mark() {
+  return <svg className="de-mark" width="40" height="40" viewBox="0 0 56 56" aria-hidden="true"><rect width="56" height="56" rx="16" fill="#4127A0" /><polyline points="12,38 22,28 29,33 42,18" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="42" cy="18" r="5" fill="#FF7A8E" /></svg>;
+}
+
 export default function Research() {
-  const [tab, setTab] = useState("overview");
-  const [f, setF] = useState({ driver: "", src: "", stage: "", emotion: "", q: "" });
+  const [tab, setTab] = useState("ranked");
+  const [f, setF] = useState(NOF);
+  const [sel, setSel] = useState("PAY");
   const [open, setOpen] = useState(null);
   const [live, setLive] = useState(null);
+  const [exp, setExp] = useState(false);
   const anon = useRef(null);
 
   useEffect(() => {
     anon.current = anonId();
-    const h = (location.hash || "").slice(1); if (TABS.some((t) => t[0] === h)) setTab(h);
-    const onHash = () => { const x = (location.hash || "").slice(1); if (TABS.some((t) => t[0] === x)) setTab(x); };
-    window.addEventListener("hashchange", onHash);
+    const pick = () => { const h = (location.hash || "").slice(1); if (TABS.some((t) => t[0] === h)) setTab(h); };
+    pick(); window.addEventListener("hashchange", pick);
     fetch("/api/research").then((r) => r.json()).then((j) => setLive(!!j.live), () => setLive(false));
-    return () => window.removeEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", pick);
   }, []);
-  useEffect(() => { const k = (e) => { if (e.key === "Escape") setOpen(null); }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); }, []);
+  useEffect(() => { const k = (e) => { if (e.key === "Escape") { setOpen(null); setExp(false); } }; window.addEventListener("keydown", k); return () => window.removeEventListener("keydown", k); }, []);
+
+  const items = useMemo(() => applyFilters(f), [f]);
+  const ranking = useMemo(() => rankAreas(items), [items]);
 
   function go(t) { setTab(t); try { history.replaceState(null, "", "#" + t); } catch {} window.scrollTo({ top: 0 }); log("tap_option", { option: "tab:" + t }); }
-  function focus(next) { setF({ driver: "", src: "", stage: "", emotion: "", q: "", ...next }); go("evidence"); }
   function log(type, data) { try { sb().from("events").insert({ anon_id: anon.current || "anon-unknown", moment: "RESEARCH", type, data: { surface: "research", ...data } }).then(() => {}, () => {}); } catch {} }
 
+  const showFilters = tab === "ranked" || tab === "sources";
   return (
-    <div className="rs">
-      <header className="rs-head">
-        <div>
-          <h1>Research</h1>
-          <p>Why first SIPs lapse, from {TOTAL} first-hand stories in 19,005 public posts.</p>
+    <div className="de">
+      <header className="de-head">
+        <div className="de-brand">
+          <Mark />
+          <div><p className="de-name"><b>Groww</b> <span>Discovery Engine</span></p><p className="de-tag">Why first-time investors' first SIPs lapse.</p></div>
         </div>
-        <span className={"rs-live " + (live ? "on" : "")}>{live === null ? "Checking AI…" : live ? "Live AI on" : "Live AI off · saved answers"}</span>
+        <div className="de-actions">
+          <span className={"rs-live " + (live ? "on" : "")}>{live === null ? "Checking AI…" : live ? "Live AI on" : "Live AI off · saved answers"}</span>
+          <button type="button" className="de-export" onClick={() => setExp(true)}><Download size={16} aria-hidden="true" /> Export</button>
+        </div>
       </header>
-      <nav className="rs-tabs" role="tablist" aria-label="Research views">
-        {TABS.map(([id, l]) => <button key={id} role="tab" type="button" aria-selected={tab === id} onClick={() => go(id)}>{l}</button>)}
+      <nav className="de-tabs" role="tablist" aria-label="Research views">
+        {TABS.map(([id, l, Icon]) => <button key={id} role="tab" type="button" aria-selected={tab === id} onClick={() => go(id)}><Icon size={16} aria-hidden="true" />{l}</button>)}
       </nav>
-      <div className="rs-body">
-        {tab === "overview" && <Overview focus={focus} openItem={setOpen} />}
-        {tab === "evidence" && <Evidence f={f} setF={setF} openItem={setOpen} />}
+      <main className="de-body">
+        {tab === "ranked" && <Hero k="First SIPs · public investor evidence" h="Small misses. Real exits." p="Explore why first-time investors' SIPs lapse, what they say in their own words, and where the product can step in." status />}
+        {tab === "ranked" && <Kpis />}
+        {tab === "sources" && <Hero k="Source breakdown · reviews, forums and comments" h="Different sources. The same leaks." p="See which problems recur across channels, and where the evidence is still concentrated." />}
+        {showFilters && <Filters f={f} setF={setF} items={items} ranking={ranking} />}
+        {tab === "ranked" && <Ranked ranking={ranking} sel={sel} setSel={setSel} log={log} />}
+        {tab === "sources" && <Sources items={items} ranking={ranking} />}
         {tab === "ask" && <Ask live={live} openItem={setOpen} log={log} />}
         {tab === "classify" && <Classify live={live} log={log} />}
         {tab === "method" && <Method />}
-      </div>
+      </main>
+      <footer className="de-foot">
+        <p>Public posts only · Sample patterns, not population estimates · Snapshot coded October 2026.</p>
+      </footer>
       {open && <Drawer item={BY_ID[open]} onClose={() => setOpen(null)} />}
+      {exp && <Export f={f} items={items} ranking={ranking} onClose={() => setExp(false)} log={log} />}
     </div>
   );
 }
 
-/* ---------------- Overview ---------------- */
-function Overview({ focus, openItem }) {
-  const max = R.ranking[0].score;
-  const srcs = Object.keys(SRC);
-  const mx = R.matrix; const mmax = Math.max(...Object.values(mx).flatMap((r) => Object.values(r)));
+function Hero({ k, h, p, status }) {
   return (
-    <div className="rs-stack">
-      <section className="rs-answer" aria-labelledby="ans">
-        <p className="rs-k">The answer</p>
-        <h2 id="ans">Payment failure is the biggest fixable leak in first SIPs.</h2>
-        <p>It ranks first on opportunity score (13.3, ahead of 9.7 for deciding to stop) and holds first in 945 of 1,000 resamples. Most of these stories describe a failure nobody explained, then an automatic cancellation.</p>
-        <button type="button" className="rs-btn" onClick={() => focus({ driver: "PAY" })}>Read the 52 payment stories</button>
-      </section>
-
-      <section className="rs-panel" aria-labelledby="rank">
-        <div className="rs-ph"><h3 id="rank">Where the 12-month metric leaks</h3><p>Opportunity score = share × how directly it ends the SIP × how much product can change it × evidence strength. Select a row to read its stories.</p></div>
-        <ol className="rs-rank">
-          {R.ranking.map((r, i) => (
-            <li key={r.driver}>
-              <button type="button" onClick={() => focus({ driver: r.driver })} aria-label={`${D[r.driver]}: score ${r.score}, ${r.n} stories. Read them.`}>
-                <span className="rs-n">{i + 1}</span>
-                <span className="rs-name"><Tag d={r.driver} /></span>
-                <span className="rs-bar"><i data-d={r.driver} style={{ width: (r.score / max) * 100 + "%" }} /></span>
-                <b>{r.score}</b>
-                <span className="rs-meta">{r.n} stories · {r.share}%</span>
-              </button>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <div className="rs-two">
-        <section className="rs-panel" aria-labelledby="find">
-          <div className="rs-ph"><h3 id="find">What the evidence says</h3><p>Answers to the discovery questions. Every claim cites real stories.</p></div>
-          <div className="rs-finds">
-            {R.findings.map((x, k) => (
-              <details key={k} open={k === 2}>
-                <summary>{x.q}</summary>
-                <p>{x.a}</p>
-                <div className="rs-cites">{x.c.map((id) => <button key={id} type="button" onClick={() => openItem(id)}>{id}</button>)}</div>
-              </details>
-            ))}
-          </div>
-        </section>
-        <section className="rs-panel" aria-labelledby="mx">
-          <div className="rs-ph"><h3 id="mx">Each source hears a different part</h3><p>Stories by driver and source. Darker cells hold more. Select a cell to read them.</p></div>
-          <div className="rs-mx" role="table" aria-label="Stories by driver and source">
-            <div role="row" className="rs-mxr hd"><span role="columnheader" />{srcs.map((s) => <span role="columnheader" key={s}>{SRC[s]}</span>)}</div>
-            {["PAY", "STOP", "EXPECT", "AMOUNT", "PAUSE", "TRUST", "CONFUSE", "KEEP"].map((d) => (
-              <div role="row" className="rs-mxr" key={d}>
-                <span role="rowheader">{D[d]}</span>
-                {srcs.map((s) => { const v = mx[d][s] || 0; const a = v / mmax; return (
-                  <button role="cell" key={s} type="button" disabled={!v} onClick={() => focus({ driver: d, src: s })} aria-label={`${D[d]} in ${SRC[s]}: ${v}`} style={{ "--a": (0.08 + a * 0.92).toFixed(2) }} className={a > 0.5 ? "dk" : ""}>{v}</button>); })}
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-    </div>
+    <section className="de-hero">
+      <div><p className="de-k">{k}</p><h1>{h}</h1><p className="de-sub">{p}</p></div>
+      {status && <span className="de-status"><i aria-hidden="true" />Snapshot complete</span>}
+    </section>
   );
 }
 
-/* ---------------- Evidence ---------------- */
-function Evidence({ f, setF, openItem }) {
-  const [shown, setShown] = useState(30);
-  const list = useMemo(() => {
-    const q = f.q.trim().toLowerCase();
-    return R.items.filter((i) => (!f.driver || i.driver === f.driver) && (!f.src || i.src === f.src) && (!f.stage || i.stage === f.stage) && (!f.emotion || i.emotion === f.emotion) && (!q || i.text.toLowerCase().includes(q) || i.id.toLowerCase() === q))
-      .sort((a, b) => (a.evidence === b.evidence ? b.date.localeCompare(a.date) : a.evidence === "STRONG" ? -1 : 1));
-  }, [f]);
-  useEffect(() => setShown(30), [f]);
+function Kpis() {
+  const kept = R.items.filter((i) => i.driver === "KEEP").length; const ranked = R.items.filter((i) => RANKED.includes(i.driver)).length;
+  const k = [["Public posts collected", "19,005", "Reddit, TradingQ&A, YouTube, Play Store, App Store"], ["Passed the filters", "2,518", "About a SIP, told first-hand"], ["Stories coded", String(TOTAL), `${ranked} lapse, ${kept} continuers, ${TOTAL - ranked - kept} context`], ["Lapse stories ranked", String(ranked), "The denominator for every share"], ["Areas ranked", "8", "Ways a first SIP leaks"], ["Human–AI agreement", "κ 0.50", "Moderate, after 3 codebook rounds"]];
+  return <div className="de-kpis">{k.map(([l, v, s], i) => <div key={l} className={"de-kpi" + (i === 0 ? " hl" : "")}><p className="l">{l}</p><p className="v">{v}</p><p className="s">{s}</p></div>)}</div>;
+}
+
+function Filters({ f, setF, items, ranking }) {
   const set = (k, v) => setF({ ...f, [k]: v });
-  const active = ["driver", "src", "stage", "emotion", "q"].filter((k) => f[k]);
+  const on = f.src || f.year || f.stage || f.strong;
   return (
-    <div className="rs-stack">
-      <div className="rs-drivers" role="group" aria-label="Filter by driver">
-        <button type="button" aria-pressed={!f.driver} onClick={() => set("driver", "")}>All</button>
-        {Object.keys(D).map((d) => <button key={d} type="button" aria-pressed={f.driver === d} onClick={() => set("driver", f.driver === d ? "" : d)} data-d={d}><i aria-hidden="true" />{D[d]}</button>)}
-      </div>
-      <div className="rs-filters">
-        <label className="rs-search"><Search size={16} aria-hidden="true" /><span className="sr">Search stories</span><input value={f.q} onChange={(e) => set("q", e.target.value)} placeholder="Search words, e.g. autopay, EMI, red" />{f.q && <button type="button" aria-label="Clear search" onClick={() => set("q", "")}><X size={14} /></button>}</label>
-        <Sel label="Source" v={f.src} on={(v) => set("src", v)} opts={SRC} all="All sources" />
-        <Sel label="Stage" v={f.stage} on={(v) => set("stage", v)} opts={STAGE} all="All stages" />
-        <Sel label="Feeling" v={f.emotion} on={(v) => set("emotion", v)} opts={EMO} all="All feelings" />
-      </div>
-      <div className="rs-count" role="status">
-        <b>{list.length}</b> of {TOTAL} stories
-        {active.length > 0 && <button type="button" onClick={() => setF({ driver: "", src: "", stage: "", emotion: "", q: "" })}>Clear filters</button>}
-      </div>
-      {list.length === 0 ? <p className="rs-empty">No stories match. Remove a filter or try a different word.</p> : (
-        <ul className="rs-items">
-          {list.slice(0, shown).map((i) => (
-            <li key={i.id}><button type="button" onClick={() => openItem(i.id)}>
-              <span className="rs-ex">“{i.text}”</span>
-              <span className="rs-im"><Tag d={i.driver} small /><span>{SRC[i.src]} · {fmtDate(i.date)}</span><span>{STAGE[i.stage]}</span><span>{EMO[i.emotion]}</span>{i.evidence === "WEAK" && <span className="weak">General opinion</span>}<span className="id">{i.id}</span></span>
-            </button></li>
-          ))}
-        </ul>
-      )}
-      {shown < list.length && <button type="button" className="rs-more" onClick={() => setShown(shown + 30)}>Show {Math.min(30, list.length - shown)} more</button>}
+    <div className="de-filters" role="group" aria-label="Filter evidence">
+      <span className="de-fl">Filter evidence</span>
+      <label><span>Source</span><select value={f.src} onChange={(e) => set("src", e.target.value)}><option value="">All sources</option>{Object.entries(SRC).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+      <label><span>Published</span><select value={f.year} onChange={(e) => set("year", e.target.value)}><option value="">All dates</option>{Object.entries(YEARS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+      <label><span>Stage</span><select value={f.stage} onChange={(e) => set("stage", e.target.value)}><option value="">All stages</option>{Object.entries(STAGES).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+      <label className="de-check"><input type="checkbox" checked={f.strong} onChange={(e) => set("strong", e.target.checked)} /><span>First-hand only</span></label>
+      {on && <button type="button" className="de-clear" onClick={() => setF(NOF)}>Clear</button>}
+      <p className="de-count" role="status">{items.length} stories · {ranking.N} ranked · {ranking.rows.filter((r) => r.n).length} areas</p>
     </div>
   );
 }
-function Sel({ label, v, on, opts, all }) { return <label className="rs-sel"><span className="sr">{label}</span><select value={v} onChange={(e) => on(e.target.value)}><option value="">{all}</option>{Object.entries(opts).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>; }
+
+/* ---------------- Ranked areas ---------------- */
+function Ranked({ ranking, sel, setSel, log }) {
+  const [mode, setMode] = useState("score");
+  const detail = useRef(null);
+  const rows = ranking.rows;
+  const cur = rows.find((r) => r.d === sel) || rows[0];
+  const max = Math.max(...rows.map((r) => (mode === "score" ? r.score : mode === "n" ? r.n : r.share)), 0.0001);
+  function pick(d) { setSel(d); log("tap_option", { option: "area:" + d }); if (window.innerWidth < 900 && detail.current) detail.current.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  if (!ranking.N) return <p className="rs-empty">No stories match these filters. Clear a filter to see the ranking.</p>;
+  return (
+    <div className="de-grid">
+      <aside className="de-list" aria-label="Opportunity areas">
+        <div className="de-lh"><h2>Opportunity areas</h2><span>{rows.filter((r) => r.n).length} areas</span></div>
+        <div className="de-seg" role="group" aria-label="Rank by">
+          {[["score", "Score"], ["n", "Stories"], ["share", "% of ranked"]].map(([k, l]) => <button key={k} type="button" aria-pressed={mode === k} onClick={() => setMode(k)}>{l}</button>)}
+        </div>
+        <ol>
+          {rows.map((r) => { const v = mode === "score" ? r.score : mode === "n" ? r.n : r.share; return (
+            <li key={r.d}><button type="button" aria-current={r.d === cur.d} onClick={() => pick(r.d)} data-d={r.d}>
+              <span className="no">{String(r.rank).padStart(2, "0")}</span>
+              <span className="nm">{META[r.d].t}</span>
+              <b>{mode === "share" ? pct(v) : v}</b>
+              <span className="bar"><i style={{ width: (v / max) * 100 + "%" }} /></span>
+            </button></li>); })}
+        </ol>
+        <p className="de-lnote">Score = share × ends the SIP × product can fix × evidence. Equal scores share a rank.</p>
+      </aside>
+      <section className="de-detail" ref={detail} aria-live="polite"><Area r={cur} N={ranking.N} /></section>
+    </div>
+  );
+}
+
+function Area({ r, N }) {
+  const m = META[r.d]; const [shown, setShown] = useState(6);
+  useEffect(() => setShown(6), [r.d, N]);
+  const its = [...r.its].sort((a, b) => (a.evidence === b.evidence ? b.date.replace("~", "").localeCompare(a.date.replace("~", "")) : a.evidence === "STRONG" ? -1 : 1));
+  const stages = count(r.its, "stage").filter(([k]) => k !== "UNKNOWN"); const feels = count(r.its, "emotion"); const segs = count(r.its, "seg");
+  return (
+    <>
+      <div className="de-dtop" data-d={r.d}>
+        <div className="de-badges"><span className="de-rank">Rank {String(r.rank).padStart(2, "0")}</span><span>Evidence across {r.sources} source{r.sources === 1 ? "" : "s"}</span><Tag d={r.d} small /></div>
+        <h2>{m.t}</h2>
+        <p className="de-desc">{m.d}</p>
+        <div className="de-stats">
+          <div><p className="l">Stories in this area</p><p className="v acc">{r.n}</p></div>
+          <div><p className="l">Of ranked stories</p><p className="v">{pct(r.share)}</p></div>
+          <div><p className="l">Opportunity score</p><p className="v">{r.score}</p></div>
+        </div>
+        <div className="de-calc" aria-label="How the score is built">
+          <span><b>{r.share.toFixed(1)}</b> share</span><i>×</i><span title={m.ex}><b>{W[r.d].exit.toFixed(1)}</b> ends the SIP</span><i>×</i><span title={m.ad}><b>{W[r.d].addr.toFixed(1)}</b> product can fix</span><i>×</i><span title={`${Math.round(r.strong * 100)}% of these stories are first-hand`}><b>{r.ev.toFixed(2)}</b> evidence</span><i>=</i><span className="eq"><b>{r.score}</b></span>
+        </div>
+        <dl className="de-why"><div><dt>Ends the SIP</dt><dd>{m.ex}</dd></div><div><dt>Product can fix</dt><dd>{m.ad}</dd></div></dl>
+        {stages.length > 0 && <div className="de-chips"><span className="lab">When</span>{stages.map(([k, v]) => <span key={k} className="chip">{STAGE[k]} <b>{v}</b></span>)}</div>}
+        {feels.length > 0 && <div className="de-chips"><span className="lab">Feelings</span>{feels.map(([k, v]) => <span key={k} className="chip">{EMO[k]} <b>{v}</b></span>)}</div>}
+        {segs.length > 0 && <div className="de-chips"><span className="lab">Who</span>{segs.map(([k, v]) => <span key={k} className="chip">{SEG[k] || k} <b>{v}</b></span>)}</div>}
+        <div className="de-inv"><p className="t">What to investigate</p><p>{m.q}</p></div>
+      </div>
+      <div className="de-ev">
+        <div className="de-evh"><h3>Evidence, in their words</h3><span>{r.n} {r.n === 1 ? "story" : "stories"}</span></div>
+        {its.length === 0 ? <p className="rs-empty">No stories in this area under the current filters.</p> : (
+          <ul>
+            {its.slice(0, shown).map((i) => (
+              <li key={i.id} className="de-card">
+                <div className="meta"><span>{SRC[i.src]}</span><span>·</span><span>{fmtDate(i.date)}</span>{i.stars && <><span>·</span><span>{i.stars}★</span></>}<span className="pill">{STAGE[i.stage]}</span>{i.evidence === "WEAK" && <span className="pill weak">General opinion</span>}</div>
+                <p className="qt">“{i.text}”</p>
+                <div className="foot"><span className="feel">{EMO[i.emotion]}</span>{i.url && <a href={i.url} target="_blank" rel="noopener noreferrer">View source <ArrowUpRight size={14} aria-hidden="true" /></a>}</div>
+                <details><summary>See coding notes</summary>
+                  <dl><div><dt>ID</dt><dd>{i.id}</dd></div><div><dt>Area</dt><dd>{D[i.driver]}</dd></div><div><dt>Stage</dt><dd>{STAGE[i.stage]}</dd></div><div><dt>Feeling</dt><dd>{EMO[i.emotion]}</dd></div><div><dt>Evidence</dt><dd>{i.evidence === "STRONG" ? "First-hand and specific" : "General opinion"}</dd></div>{i.seg && <div><dt>Signals</dt><dd>{i.seg.split(/[,;|]/).filter(Boolean).map((x) => SEG[x] || x).join(", ")}</dd></div>}{i.date.startsWith("~") && <div><dt>Date</dt><dd>Approximate: comment age on the video</dd></div>}</dl>
+                </details>
+              </li>
+            ))}
+          </ul>
+        )}
+        {shown < its.length && <button type="button" className="rs-more" onClick={() => setShown(shown + 10)}>Show {Math.min(10, its.length - shown)} more</button>}
+      </div>
+    </>
+  );
+}
+
+/* ---------------- Source breakdown ---------------- */
+function Sources({ items, ranking }) {
+  const [mode, setMode] = useState("rel");
+  const kept = items.filter((i) => i.driver === "KEEP").length; const other = items.filter((i) => i.driver === "OTHER").length;
+  const ranked = items.filter((i) => RANKED.includes(i.driver));
+  const mix = Object.keys(SRC).map((s) => [s, ranked.filter((i) => i.src === s).length]);
+  const rows = [...ranking.rows].filter((r) => r.n).sort((a, b) => b.n - a.n);
+  const maxN = Math.max(...rows.map((r) => r.n), 1);
+  return (
+    <div className="de-stack">
+      <section className="de-panel">
+        <h2 className="de-h3">What makes up the {items.length} stories?</h2>
+        <div className="de-comp">
+          <div><b>{ranked.length}</b> lapse stories<span>used for ranking</span></div><i>+</i>
+          <div><b>{kept}</b> continuer stories<span>not ranked</span></div><i>+</i>
+          <div><b>{other}</b> context only<span>not ranked</span></div>
+        </div>
+        <p className="de-note">Each story gets one primary area, so the {ranked.length} lapse stories add up to the ranked total. Continuer stories, people saying why they kept going, stay beside the evidence as contrast.</p>
+      </section>
+      <div className="de-src">
+        <section className="de-panel">
+          <h2 className="de-h3">Source mix</h2>
+          <p className="de-note">{ranked.length} ranked stories in this view</p>
+          <ul className="de-mix">{mix.map(([s, n]) => <li key={s}><i data-s={s} aria-hidden="true" /><span>{SRC[s]}</span><b>{ranked.length ? pct((n / ranked.length) * 100) : "0%"}</b></li>)}</ul>
+          <p className="de-note">Reddit was sampled down from 1,553 matching items to 280, so its weight here is a choice, not its true size.</p>
+        </section>
+        <section className="de-panel">
+          <div className="de-sh"><h2 className="de-h3">Where each area comes from</h2>
+            <div className="de-seg" role="group" aria-label="Show as">{[["rel", "Relative %"], ["n", "Story count"]].map(([k, l]) => <button key={k} type="button" aria-pressed={mode === k} onClick={() => setMode(k)}>{l}</button>)}</div></div>
+          <p className="de-note">Each bar is one area. Relative % shows the source mix within that area; story count keeps bars to scale.</p>
+          <ul className="de-stk">
+            {rows.map((r) => (
+              <li key={r.d}>
+                <div className="lh"><p>{META[r.d].t}</p><span>{r.n} stories</span></div>
+                <div className="track" style={{ width: mode === "n" ? (r.n / maxN) * 100 + "%" : "100%" }}>
+                  {Object.keys(SRC).map((s) => { const v = r.bySrc[s] || 0; if (!v) return null; const w = (v / r.n) * 100; return <span key={s} data-s={s} style={{ width: w + "%" }} title={`${SRC[s]}: ${v}`}>{w >= 14 ? (mode === "n" ? v : Math.round(w) + "%") : ""}</span>; })}
+                </div>
+                <p className="lg">{Object.keys(SRC).filter((s) => r.bySrc[s]).map((s) => <span key={s}><i data-s={s} aria-hidden="true" />{SRC[s]} {mode === "n" ? r.bySrc[s] : pct((r.bySrc[s] / r.n) * 100)}</span>)}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Export ---------------- */
+function Export({ f, items, ranking, onClose, log }) {
+  const ref = useRef(null);
+  useEffect(() => { ref.current && ref.current.focus(); }, []);
+  function json() {
+    const out = { snapshot: "October 2026", filters: f, ranking: ranking.rows.map(({ its, ...r }) => ({ ...r, area: META[r.d].t })), stories: items };
+    download("sip-discovery-engine.json", "application/json", JSON.stringify(out, null, 2)); log("tap_option", { option: "export:json" });
+  }
+  function csv() {
+    const h = "id,source,date,area,stage,feeling,evidence,signals,excerpt,url\n";
+    const b = items.map((i) => [i.id, SRC[i.src], i.date, D[i.driver], STAGE[i.stage], EMO[i.emotion], i.evidence, i.seg, i.text, i.url].map(q).join(",")).join("\n");
+    download("sip-discovery-engine.csv", "text/csv", h + b); log("tap_option", { option: "export:csv" });
+  }
+  return (
+    <div className="rs-scrim" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="de-modal" role="dialog" aria-modal="true" aria-labelledby="exh" tabIndex={-1} ref={ref}>
+        <div className="de-mh"><h2 id="exh">Export the research</h2><button type="button" aria-label="Close" onClick={onClose}><X size={18} /></button></div>
+        <p className="de-note">Exports use the active filters: {items.length} stories.</p>
+        <button type="button" className="de-dl" onClick={json}><FileJson size={22} aria-hidden="true" /><span><b>Evidence and analysis</b><span>JSON with every field, the ranking and the filter settings</span></span></button>
+        <button type="button" className="de-dl" onClick={csv}><FileSpreadsheet size={22} aria-hidden="true" /><span><b>Evidence spreadsheet</b><span>CSV with one row per story</span></span></button>
+        <p className="de-note">Excerpts are trimmed public posts. Names and handles are never included.</p>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Methodology ---------------- */
+function Method() {
+  const ranked = R.items.filter((i) => RANKED.includes(i.driver)).length; const kept = R.items.filter((i) => i.driver === "KEEP").length;
+  const steps = [["Collect", "19,005 public posts, pulled in October 2026: Reddit (11,802), TradingQ&A (3,445), YouTube comments on 32 SIP videos (1,610), Play Store (1,160), App Store India (988)."], ["Filter", "A topic gate (SIP, mandate, instalment, pause, returns), then a first-person gate. 2,518 passed. Reddit's 1,553 matches were sampled to 280."], ["Code", "Claude gives each story one primary area, plus stage, feeling, signals and evidence strength, from a written codebook (v1.2)."], ["Check", "Three blind golden sets of 20 stories, coded by hand. Agreement rose from κ 0.15 to 0.29 to 0.50 as the codebook was tightened."], ["Rank", `${ranked} lapse stories form one ranking across 8 areas. ${kept} continuer stories stay beside the evidence as contrast.`]];
+  const rules = ["One primary area per story. When two apply, take the one closest to the SIP ending: payment, then stop, then pause, then amount, then expectation.", "A payment story needs a real failure, rejection or cancellation. Questions about setting up a mandate are not failures.", "First-hand beats general. Advice to others (\"never stop your SIP!\") is coded as an outside voice with weak evidence.", "Keep the person's words apart from the coder's reading. Excerpts are trimmed with “…”, never reworded.", "Never invent context the text doesn't give. Unclear stage or area becomes Unknown or Other.", "YouTube dates are approximate: the comment's age on the video, not an exact date."];
+  const limits = [["Loud is not common", "Public posts over-represent angry, engaged voices. Counts show where pain is loud, not how common it is. Groww's own instalment data is the real check."], ["Store reviews are not random", "Play Store gave its 1,160 'most relevant' reviews. App Store reviews span 2018 to 2026, and older ones may describe features that have changed."], ["One forum is another platform's", "TradingQ&A users are mostly on Zerodha Coin, so their posts count only for platform-neutral SIP mechanics."], ["One AI coder", "Agreement with a human reached κ 0.50, which is moderate. Treat counts as directional and read the stories."]];
+  return (
+    <>
+      <section className="de-hero"><div><p className="de-k">Methodology</p><h1>How the evidence becomes a ranking.</h1><p className="de-sub">The collection, coding and counting rules behind this research.</p></div></section>
+      <div className="de-meth">
+        <aside className="de-panel de-steps"><h2 className="de-h3">From posts to evidence</h2>
+          <ol>{steps.map(([t, d], k) => <li key={t}><span>{k + 1}</span><div><b>{t}</b><p>{d}</p></div></li>)}</ol></aside>
+        <section className="de-panel de-read">
+          <p className="de-k">Coded batch · October 2026</p>
+          <h2>How to read this research</h2>
+          <p className="de-lead">The question is why a first-time investor's first SIP stops before month 12, and which of those reasons the product can change. This dashboard ranks problem areas and the questions worth investigating. It does not measure how common each problem is across all investors.</p>
+          <h3>One shared ranking</h3>
+          <div className="de-formula"><p><b>Share</b> = stories in an area ÷ all ranked stories in the active filters × 100</p><p><b>Opportunity score</b> = share × ends the SIP (0–1) × product can fix (0–1) × evidence</p><p><b>Evidence</b> = 0.5 + 0.5 × the share of first-hand stories, so general opinions count half</p></div>
+          <p className="de-note">The two weights are set once per area and shown on every area page, so nothing is hidden. Filters change the shares and scores; the weights stay fixed. Equal scores share a rank.</p>
+          <h3>What is in this snapshot</h3>
+          <div className="de-comp"><div><b>{ranked}</b> lapse stories<span>ranked</span></div><div><b>{kept}</b> continuers<span>contrast, not ranked</span></div><div><b>{TOTAL - ranked - kept}</b> context<span>not ranked</span></div></div>
+          <h3>How much to trust the labels</h3>
+          <div className="rs-kappa">{[["Round 1", 0.15, "Codebook v1"], ["Round 2", 0.29, "v1.1: clearer stop vs pause"], ["Round 3", 0.5, "v1.2: payment needs a real failure"]].map(([r, v, n]) => <div key={r}><span className="lab">{r}</span><span className="bar"><i style={{ width: v * 100 + "%" }} /></span><b>{v.toFixed(2)}</b><span className="note">{n}</span></div>)}</div>
+          <p className="de-note">Payment failure stays first in 945 of 1,000 bootstrap resamples and 937 of 1,000 random nudges to the weights. Logged corrections: a finding that cited a story that doesn't exist, 22 set-up questions miscounted as failures, and 19 tie-rule misses.</p>
+          <h3>Coding rules</h3>
+          <ul className="de-rules">{rules.map((x) => <li key={x}>{x}</li>)}</ul>
+          <h3>Limitations</h3>
+          <dl className="rs-limits">{limits.map(([t, d]) => <div key={t}><dt>{t}</dt><dd>{d}</dd></div>)}</dl>
+          <p className="de-note">The first version of this page is kept at <a href="/research-v1">/research-v1</a>. The investor-facing engine is at <a href="/engine">/engine</a>.</p>
+        </section>
+      </div>
+    </>
+  );
+}
 
 /* ---------------- Ask ---------------- */
 function Ask({ live, openItem, log }) {
@@ -261,26 +435,6 @@ function Classify({ live, log }) {
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-/* ---------------- Method ---------------- */
-function Method() {
-  const steps = [["Collect", "19,005 public posts: Reddit (11,802), TradingQ&A (3,445), YouTube comments on 32 SIP videos (1,610), Play Store (1,160), App Store India (988). Pulled October 2026."], ["Filter", "Keyword match on SIP, mandate, instalment, pause and returns, then a first-person filter. 2,518 passed. Reddit, the largest source, was sampled to 280."], ["Label", "Claude tags each story with one driver, plus stage, segment, feeling and evidence strength, using a written codebook (v1.2)."], ["Score", "Opportunity = share × how directly it ends the SIP × how much product can change it × evidence strength."], ["Check", "Three blind golden sets of 20 stories, labelled by hand. Agreement rose from κ 0.15 to 0.29 to 0.50 as the codebook was tightened."]];
-  const limits = [["Loud is not the same as common", "Public feedback over-represents angry, engaged voices. Counts show where pain is loud, not how common it is. Groww's own instalment data is the check."], ["Store reviews are not random", "Play Store reviews are the 1,160 'most relevant', not a random sample. App Store reviews span 2018–2026."], ["Reddit was sampled", "Of 1,553 Reddit items that passed the filters, 280 were labelled: every post with three or more lapse signals, plus seeded random samples."], ["One forum is another platform's", "TradingQ&A users are mostly Zerodha Coin investors. Their posts count only for platform-neutral SIP mechanics."], ["One AI coder, checked three times", "Agreement with a human coder reached κ 0.50, which is moderate. Treat counts as directional."]];
-  return (
-    <div className="rs-stack">
-      <section className="rs-panel"><div className="rs-ph"><h3>How the engine works</h3><p>Five steps, from public posts to a ranked list.</p></div>
-        <ol className="rs-steps">{steps.map(([t, d], k) => <li key={t}><span>{k + 1}</span><b>{t}</b><p>{d}</p></li>)}</ol></section>
-      <div className="rs-two">
-        <section className="rs-panel"><div className="rs-ph"><h3>How much to trust the labels</h3><p>Human–AI agreement on blind golden sets (Cohen's κ).</p></div>
-          <div className="rs-kappa">{[["Round 1", 0.15, "Codebook v1"], ["Round 2", 0.29, "v1.1: clearer stop vs pause"], ["Round 3", 0.5, "v1.2: payment needs a real failure"]].map(([r, v, n]) => <div key={r}><span className="lab">{r}</span><span className="bar"><i style={{ width: v * 100 + "%" }} /></span><b>{v.toFixed(2)}</b><span className="note">{n}</span></div>)}</div>
-          <p className="rs-note">Payment failure stays first in 945 of 1,000 bootstrap resamples and 937 of 1,000 random nudges to the weights.</p></section>
-        <section className="rs-panel"><div className="rs-ph"><h3>Limits</h3><p>Read these before quoting a number.</p></div>
-          <dl className="rs-limits">{limits.map(([t, d]) => <div key={t}><dt>{t}</dt><dd>{d}</dd></div>)}</dl></section>
-      </div>
-      <p className="rs-note">The full codebook, golden sets and every correction are in the AI Evidence Log. <a href="/research-v1/index.html">The first version of this page</a> is kept for reference.</p>
     </div>
   );
 }
