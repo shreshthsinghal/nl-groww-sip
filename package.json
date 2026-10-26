@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "eval:companion": "node --no-warnings scripts/eval-companion.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",

@@ -1,3 +1,3 @@
 import Companion from "./Companion";
-export const metadata = { title: "SIP Companion · MVP", description: "When a SIP slips, it says what happened and what you can do. Every AI reply passes nine checks first." };
+export const metadata = { title: "SIP Continuation Companion · MVP", description: "An interactive, eval-gated companion that explains a slipped SIP instalment and lays out every option fairly. Illustrative demo data." };
 export default function Page() { return <Companion />; }
