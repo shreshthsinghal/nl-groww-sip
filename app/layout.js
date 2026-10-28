@@ -4,15 +4,19 @@ import "./companion/app.css";
 import "./companion/cx.css";
 import "./engine/engine.css";
 import "./research/research.css";
+import { headers } from "next/headers";
 import Nav from "@/components/Nav";
 
-export const metadata = {
-  title: "SIP Continuation · Groww case study",
-  description: "Why first-time SIPs end without anyone deciding to stop them: an AI discovery engine, an eval-gated companion MVP, and live metrics.",
+const META = {
+  prototype: { title: "SIP Companion · Groww case study prototype", description: "A prototype that helps a first-time investor understand a missed SIP instalment and choose what to do, without pressure. Every AI answer is checked before it is shown." },
+  engine: { title: "SIP Discovery Engine · Groww case study", description: "Why first SIPs lapse, from 450 first-hand stories drawn from 19,005 public posts: describe your SIP and see the pattern, or explore the research." }
 };
+async function site() { return (await headers()).get("x-site") === "engine" ? "engine" : "prototype"; }
+export async function generateMetadata() { return META[await site()]; }
 export const viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const which = await site();
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
@@ -23,7 +27,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <a className="skip" href="#main">Skip to content</a>
-        <Nav />
+        <Nav site={which} />
         <main id="main" tabIndex={-1}>{children}</main>
         <footer className="footer"><div>
           <span>A product case study about Groww, not affiliated with Groww. Sample data only. Information, not investment advice: <a href="https://investor.sebi.gov.in" target="_blank" rel="noopener">investor.sebi.gov.in</a></span>

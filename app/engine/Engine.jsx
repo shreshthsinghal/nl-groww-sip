@@ -1,6 +1,6 @@
 "use client";
+import { PROTOTYPE_URL } from "@/lib/site";
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { PATTERNS, COUNTS, TOTAL, STOP_FACTS, STOP_CAUSES, STARTERS, SOURCE } from "@/lib/patterns";
 import { sb } from "@/lib/supabase";
 
@@ -129,7 +129,7 @@ export default function Engine() {
             <div className="eg-block">
               <h3 className="eg-h3">What people in this spot can do</h3>
               <ul className="eg-opts">{P.options.map(([t, d]) => <li key={t}><b>{t}</b><span>{d}</span></li>)}</ul>
-              {P.companion && <Link className="eg-cta" href="/companion">Try this on a sample SIP in the Companion</Link>}
+              {P.companion && <a className="eg-cta" href={PROTOTYPE_URL + "/companion"} target="_blank" rel="noopener">Try this on a sample SIP in the Companion prototype</a>}
               <p className="eg-fine">These describe what exists. They're not a recommendation. For advice on your situation, speak to a SEBI-registered investment adviser.</p>
             </div>
           </>)}

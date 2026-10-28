@@ -18,8 +18,7 @@ export default async function Built() {
   const g = R.golden, red = R.redTeam, lg = R.legacy;
   const rows = [
     ["/companion", "SIP Continuation Companion (MVP)", "Five illustrative scenarios, fair options with simulated flows, and an assistant whose every answer passes the gate below.", true],
-    ["/research", "Research workspace", "For the product team: the ranked leaks, all 450 stories with filters, an ask box that cites its sources, a classifier for new feedback, and the method.", true],
-    ["/design", "Design in Figma", "Clickable prototypes of the Companion and the Engine, and the design file with tokens, components and every screen state."],
+    ["/design", "Design in Figma", "The clickable Figma prototype of the Companion, and the design file with tokens, components and every screen state."],
     ["/eval", "Companion v1 quality gate", ev ? `Latest live run: ${ev.full_pass}/${ev.n} scenarios passed, ${ev.passed ? "shipped" : "held"}.` : "The 27 locked scenarios of the first companion and its run history."],
     ["/lab", "Companion v1 lab", "The first companion's per-reply checks, recorded and live modes, and the console for moderated user tests."],
     ["/metrics", "Live metrics", "What visitors do with the companion, and results from user tests. Aggregates only."]
@@ -28,7 +27,7 @@ export default async function Built() {
     <div className="page" style={{ maxWidth: 900 }}>
       <header className="sh" style={{ gap: 12 }}>
         <h1 className="big" style={{ fontSize: "clamp(2rem,4.4vw,2.8rem)" }}>How it's built</h1>
-        <p className="lede">For reviewers: the machinery behind the two tools, the evaluation results as they actually ran, and what they don't prove.</p>
+        <p className="lede">For reviewers: the machinery behind the Companion prototype, the evaluation results as they actually ran, and what they don't prove.</p>
       </header>
       <ul className="built">
         {rows.map(([h, t, d, raw]) => (

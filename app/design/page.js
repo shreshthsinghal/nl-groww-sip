@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Design from "./Design";
-export const metadata = { title: "Design · SIP Continuation", description: "Clickable Figma prototypes of the Companion and the Engine, and the full design file." };
-export default function Page() { return <Design />; }
+export const metadata = { title: "Design", description: "Clickable Figma prototypes and the design file." };
+export default async function Page() { const site = (await headers()).get("x-site") === "engine" ? "engine" : "prototype"; return <Design site={site} />; }
