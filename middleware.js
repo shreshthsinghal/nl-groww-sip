@@ -11,12 +11,15 @@ export function middleware(req) {
   if (site === "prototype") {
     if (pathname === "/") return NextResponse.redirect(new URL("/companion" + search, req.url), 307);
     if (under(pathname, ENGINE_API)) return notFound();
-    if (under(pathname, ENGINE_ONLY)) return away(ENGINE_URL, pathname.startsWith("/engine") ? "/" : pathname);
+    if (under(pathname, ENGINE_ONLY)) return away(ENGINE_URL, pathname === "/engine" ? "/check" : pathname === "/overview" ? "/" : pathname);
     return pass();
   }
   // engine site
-  if (pathname === "/") { const h = new Headers(req.headers); h.set("x-site", site); return NextResponse.rewrite(new URL("/engine" + search, req.url), { request: { headers: h } }); }
-  if (pathname === "/engine") return NextResponse.redirect(new URL("/" + search, req.url), 307);
+  const rewrite = (to) => { const h = new Headers(req.headers); h.set("x-site", site); return NextResponse.rewrite(new URL(to + search, req.url), { request: { headers: h } }); };
+  if (pathname === "/") return rewrite("/overview");            // Discovery Engine 2.0 home
+  if (pathname === "/check") return rewrite("/engine");         // the investor-facing check, previously at "/"
+  if (pathname === "/engine") return NextResponse.redirect(new URL("/check" + search, req.url), 307);
+  if (pathname === "/overview") return NextResponse.redirect(new URL("/" + search, req.url), 307);
   if (under(pathname, PROTOTYPE_API)) return notFound();
   if (under(pathname, PROTOTYPE_ONLY)) return away(PROTOTYPE_URL, pathname);
   return pass();

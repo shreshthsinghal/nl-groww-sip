@@ -9,7 +9,7 @@ import Nav from "@/components/Nav";
 
 const META = {
   prototype: { title: "SIP Companion · Groww case study prototype", description: "A prototype that helps a first-time investor understand a missed SIP instalment and choose what to do, without pressure. Every AI answer is checked before it is shown." },
-  engine: { title: "SIP Discovery Engine · Groww case study", description: "Why first SIPs lapse, from 450 first-hand stories drawn from 19,005 public posts: describe your SIP and see the pattern, or explore the research." }
+  engine: { title: "SIP Discovery Engine 2.0 · Groww case study", description: "Why first SIPs lapse: 450 coded public stories you can search, a transparent opportunity ranking with scenario analysis, a grounded research agent and the human validation behind the AI labels." }
 };
 async function site() { return (await headers()).get("x-site") === "engine" ? "engine" : "prototype"; }
 export async function generateMetadata() { return META[await site()]; }

@@ -1,0 +1,61 @@
+id	from	to	rule
+A37	PAY	OTHER	setup: checking new autopay, no failure
+A131	PAY	OTHER	setup: misunderstands how payment works (reconciliation: human right)
+P42	PAY	OTHER	setup: dislikes being asked for autopay, no failure
+R25	PAY	OTHER	setup: confused by mandate limit, no failure
+R39	PAY	OTHER	setup: advice to switch mandate type
+R88	PAY	OTHER	setup: confused by mandate amount, no failure
+R123	PAY	OTHER	setup: how to make SIP auto-deduct
+R130	PAY	OTHER	setup: confused by mandate limit, no failure
+R157	PAY	OTHER	setup: how to set up autopay
+T5	PAY	OTHER	setup: how payment works
+T10	PAY	OTHER	setup: is auto-debit available
+T19	PAY	OTHER	setup: scheduling transfer after payday (reconciliation: human right)
+T22	PAY	OTHER	setup: which account is debited
+T43	PAY	OTHER	setup: hypothetical charge question (reconciliation: human right)
+T54	PAY	OTHER	setup: hypothetical empty wallet
+T69	PAY	OTHER	setup: hypothetical penalty question
+T91	PAY	OTHER	setup: hypothetical penalty question
+T170	PAY	OTHER	setup: worried about bank change, no failure
+T236	PAY	OTHER	setup: describes own payment preference
+Y141	PAY	OTHER	setup: hypothetical charge question (rule overrides item verdict)
+A96	PAY	STOP	reconciliation: human right (quits after KYC rejection; v1.1 rule 3)
+P74	AMOUNT	OTHER	reconciliation: human right (v1.1 rule 2)
+R40	PAY	AMOUNT	reconciliation: human right
+P179	CONFUSE	OTHER	reconciliation: engine v1.1 label right
+R146	EXPECT	STOP	v1.1 tie rule
+R201	OUTSIDE	STOP	outside rule: problem described, code the problem
+Y98	OUTSIDE	EXPECT	outside rule: problem described, code the problem
+R31	EXPECT	STOP	tie rule: states intent to stop
+R32	EXPECT	STOP	tie rule: decided to stop
+R36	EXPECT	STOP	tie rule: plans to discontinue
+R49	EXPECT	STOP	tie rule: cancelling SIPs
+R86	EXPECT	STOP	tie rule: wants to stop
+R109	EXPECT	STOP	tie rule: wanted to stop
+R114	EXPECT	STOP	tie rule: stopped SIPs
+R122	EXPECT	STOP	tie rule: stopping the SIP
+R177	EXPECT	STOP	tie rule: intends to stop
+R189	EXPECT	STOP	tie rule: intends to stop
+Y39	EXPECT	STOP	tie rule: stopped SIP
+Y79	EXPECT	STOP	tie rule: wants to stop
+R24	EXPECT	PAUSE	tie rule: paused
+R170	EXPECT	PAUSE	tie rule: paused
+T152	PAUSE	EXPECT	question rule: deliberation stays with its cause
+R15	AMOUNT	PAUSE	tie rule: stopped for some months
+R34	AMOUNT	STOP	tie rule: cancelled all SIPs
+R44	AMOUNT	STOP	tie rule: SIPs stopped
+R54	AMOUNT	STOP	tie rule: intends to stop
+R58	AMOUNT	STOP	tie rule: redeemed
+R64	AMOUNT	PAUSE	tie rule: skipping until loan closure
+R107	AMOUNT	STOP	tie rule: stopped SIP
+R169	AMOUNT	PAUSE	tie rule: paused
+R232	AMOUNT	PAUSE	tie rule: paused
+Y2	AMOUNT	STOP	tie rule: stopped and withdrew
+P88	AMOUNT	STOP	tie rule: withdraws SIP money
+T16	PAUSE	STOP	tie rule: trying to delete SIPs
+R22	PAUSE	STOP	tie rule: stopped last year
+Y12	CONFUSE	OTHER	CONFUSE is confusion inside the app only
+Y91	CONFUSE	OTHER	CONFUSE is confusion inside the app only
+Y6	OUTSIDE	OTHER	outside rule: opinion, no help sought
+Y117	OUTSIDE	OTHER	outside rule: third-party advice, not first-person
+Y176	OUTSIDE	OTHER	outside rule: opinion, no help sought

@@ -343,7 +343,7 @@ function Method() {
           <ul className="de-rules">{rules.map((x) => <li key={x}>{x}</li>)}</ul>
           <h3>Limitations</h3>
           <dl className="rs-limits">{limits.map(([t, d]) => <div key={t}><dt>{t}</dt><dd>{d}</dd></div>)}</dl>
-          <p className="de-note">The first version of this page is kept at <a href="/research-v1">/research-v1</a>. The investor-facing engine is on the <a href="/">home page</a>.</p>
+          <p className="de-note">The first version of this page is kept at <a href="/research-v1">/research-v1</a>. This is the earlier research view; the current version is <a href="/">Discovery Engine 2.0</a>, and the investor-facing check is at <a href="/check">/check</a>.</p>
         </section>
       </div>
     </>

@@ -149,3 +149,26 @@ tr:last-child td{border-bottom:none}
 .limits{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px;color:var(--pencil)}
 .limits b{color:var(--ink)}
 @media (max-width:360px){.topbar-in{gap:6px}.nav a{font-size:.875rem;padding:7px 7px}}
+
+/* engine site: eight modules, so the menu wraps on desktop and collapses on phones */
+.topbar-x .topbar-in{max-width:1240px;gap:10px}
+.topbar-x .brand i{background:#5B3FD6;border-radius:3px}
+.topbar-x .nav{gap:2px;margin-left:auto;justify-content:flex-end}
+.topbar-x .nav a{font-size:.84rem;padding:6px 10px}
+.topbar-x .nav a.nav-more{color:var(--faint);font-weight:500}
+@media (min-width:1241px){.topbar-x .topbar-in{flex-wrap:nowrap}.topbar-x .nav{flex-wrap:nowrap}.topbar-x .nav a{white-space:nowrap;padding:6px 8px}.topbar-x .nav a.nav-more:not([href="/check"]){display:none}.topbar-x .brand{white-space:nowrap}}
+.menu-btn{display:none;margin-left:auto;border:1px solid var(--rule);background:var(--surface);border-radius:999px;padding:6px 14px;font-weight:600;min-height:38px}
+@media (max-width:1240px){
+  .topbar-x .menu-btn{display:inline-flex;align-items:center}
+  .topbar-x .nav{display:none;order:5;flex-basis:100%;flex-direction:column;gap:2px;padding:6px 0 12px;margin-left:0}
+  .topbar-x .nav.open{display:flex}
+  .topbar-x .nav a{font-size:.95rem;padding:10px 12px;border-radius:10px}
+  .topbar-x .theme{order:3}
+}
+
+@media (max-width:520px){.topbar-x .brand{font-size:.95rem;gap:8px}}
+@media (max-width:520px){
+  .topbar-x .topbar-in{flex-wrap:wrap}
+  .topbar-x .nav{flex:0 0 100%;overflow:visible;flex-wrap:nowrap}
+  .topbar-x .brand{white-space:nowrap}
+}
