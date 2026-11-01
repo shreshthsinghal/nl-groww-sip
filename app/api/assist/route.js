@@ -6,7 +6,16 @@ export const runtime = "nodejs";
 export const maxDuration = 45;
 const respond = (body, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
-export async function GET() { return respond({ live: hasKey(), model: hasKey() ? MODEL : null }); }
+export async function GET(req) {
+  // ?probe=1 makes one tiny model call and reports the provider's status and error message (never the key).
+  if (new URL(req.url).searchParams.get("probe") === "1" && hasKey()) {
+    if (rateLimited(req, "probe", 3)) return respond({ error: "rate_limited" }, 429);
+    const t0 = Date.now();
+    try { const text = await callClaude("Reply with the single word OK.", { maxTokens: 5, temperature: 0, timeoutMs: 15000 }); return respond({ ok: true, model: MODEL, reply: text.slice(0, 20), ms: Date.now() - t0 }); }
+    catch (e) { return respond({ ok: false, model: MODEL, code: e.code, status: e.status || null, detail: e.detail || null, raw: e.raw || null, ms: Date.now() - t0 }); }
+  }
+  return respond({ live: hasKey(), model: hasKey() ? MODEL : null });
+}
 
 export async function POST(req) {
   if (rateLimited(req, "assist", 30)) return respond({ error: "rate_limited" }, 429);
