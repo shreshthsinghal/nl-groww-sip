@@ -1,11 +1,11 @@
 import { answer, validateCitations, citedIds } from "@/lib/discovery/agent";
 import { BY_ID } from "@/lib/discovery/core";
-import { hasKey, callClaude, extractJSON, rateLimited, PII, MODEL } from "@/lib/server";
+import { liveFor, callClaude, extractJSON, rateLimited, PII, MODEL } from "@/lib/server";
 
 export const runtime = "nodejs";
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 
-export async function GET() { return json({ grounded: true, live: hasKey(), model: hasKey() ? MODEL : null }); }
+export async function GET() { return json({ grounded: true, live: liveFor("engine"), model: liveFor("engine") ? MODEL : null }); }
 
 // Optional: let the model rephrase the direct finding only. It sees the computed facts and the cited excerpts
 // inside <evidence> tags marked as untrusted data. The rewrite is rejected unless every number and ID it uses
@@ -39,7 +39,7 @@ export async function POST(req) {
   const a = answer(question);
   if (!validateCitations(a)) return json({ error: "Internal check failed: an answer cited a record that does not exist. Nothing was shown." }, 500);
   let mode = "grounded";
-  if (hasKey() && !a.refused && !a.insufficient && body?.polish !== false) {
+  if (liveFor("engine") && !a.refused && !a.insufficient && body?.polish !== false) {
     try { const f = await polish(a); if (f) { a.findingGrounded = a.finding; a.finding = f; mode = "grounded+model"; } } catch { /* fall back to the grounded text */ }
   }
   return json({ ...a, mode, cited: citedIds(a), question });

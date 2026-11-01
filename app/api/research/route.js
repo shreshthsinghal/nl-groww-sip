@@ -1,5 +1,5 @@
 import R from "@/lib/research.json";
-import { callClaude, extractJSON, rateLimited, PII, hasKey, MODEL } from "@/lib/server";
+import { callClaude, extractJSON, rateLimited, PII, liveFor, MODEL } from "@/lib/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -24,12 +24,12 @@ relevant: false if the line is not about mutual fund/SIP behaviour (e.g. trading
 const DRIVERS = ["PAY", "STOP", "PAUSE", "AMOUNT", "EXPECT", "TRUST", "CONFUSE", "OUTSIDE", "KEEP", "OTHER"];
 const corpus = R.items.map((i) => `${i.id}|${i.src}|${i.driver}|${i.stage}|${i.text}`).join("\n");
 
-export async function GET() { return Response.json({ live: hasKey(), model: hasKey() ? MODEL : null }); }
+export async function GET() { return Response.json({ live: liveFor("engine"), model: liveFor("engine") ? MODEL : null }); }
 
 export async function POST(req) {
   if (rateLimited(req, "research", 8)) return Response.json({ error: "rate_limited" }, { status: 429 });
   let body; try { body = await req.json(); } catch { return Response.json({ error: "bad_request" }, { status: 400 }); }
-  if (!hasKey()) return Response.json({ error: "no_key" }, { status: 503 });
+  if (!liveFor("engine")) return Response.json({ error: "no_key" }, { status: 503 });
 
   if (body.mode === "classify") {
     const lines = (Array.isArray(body.lines) ? body.lines : []).map((l) => String(l).trim().slice(0, 500)).filter(Boolean).slice(0, 15);

@@ -1,6 +1,6 @@
 import STORIES from "@/lib/stories.json";
 import { keywordPattern, rankStories } from "@/lib/patterns";
-import { callClaude, extractJSON, rateLimited, PII, hasKey, MODEL } from "@/lib/server";
+import { callClaude, extractJSON, rateLimited, PII, liveFor, MODEL } from "@/lib/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -46,7 +46,7 @@ export async function POST(req) {
   const t0 = Date.now();
   let result = null, source = "keywords";
   if (forced) { result = { pattern: forced, confidence: 1, stopping: !!body.stopping }; source = "chosen"; }
-  else if (hasKey()) {
+  else if (liveFor("engine")) {
     try {
       const out = extractJSON(await callClaude(classifyPrompt(text), { maxTokens: 80, temperature: 0, timeoutMs: 12000 }));
       if (out && VALID.includes(out.pattern) && typeof out.confidence === "number") { result = { pattern: out.pattern, confidence: Math.max(0, Math.min(1, out.confidence)), stopping: !!out.stopping }; source = "ai"; }
