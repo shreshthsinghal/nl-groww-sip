@@ -8,16 +8,20 @@ export const maxDuration = 45;
 const respond = (body, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
 export async function GET(req) {
+  if (new URL(req.url).searchParams.get("models") === "1" && hasKey()) {
+    if (rateLimited(req, "probe", 3)) return respond({ error: "rate_limited" }, 429);
+    return respond({ provider: S.PROVIDER, configured: MODELS, available: await S.listGeminiModels() });
+  }
   // ?probe=1 makes one tiny model call and reports the provider's status and error message (never the key).
   if (new URL(req.url).searchParams.get("probe") === "1" && hasKey()) {
     if (rateLimited(req, "probe", 3)) return respond({ error: "rate_limited" }, 429);
     const t0 = Date.now();
     const only = new URL(req.url).searchParams.get("model");
-    const models = only && MODELS.includes(only) ? [only] : null;
+    const models = only && /^[A-Za-z0-9._:\/-]{3,80}$/.test(only) ? [only] : null;
     try { const text = await callClaude("Reply with the single word OK.", { maxTokens: 5, temperature: 0, timeoutMs: 15000, models }); return respond({ ok: true, tried: models || MODELS, answeredBy: S.lastModel, reply: text.slice(0, 20), ms: Date.now() - t0 }); }
     catch (e) { return respond({ ok: false, tried: models || MODELS, code: e.code, status: e.status || null, detail: e.detail || null, raw: e.raw || null, ms: Date.now() - t0 }); }
   }
-  return respond({ live: hasKey(), model: hasKey() ? MODEL : null, fallbacks: hasKey() ? MODELS.slice(1) : [] });
+  return respond({ live: hasKey(), provider: S.PROVIDER, model: hasKey() ? MODEL : null, fallbacks: hasKey() ? MODELS.slice(1) : [] });
 }
 
 export async function POST(req) {
