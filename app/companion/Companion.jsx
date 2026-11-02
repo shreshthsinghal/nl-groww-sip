@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RotateCcw, Smartphone, Monitor, ShieldCheck, ShieldAlert, ArrowRight, X, ScanSearch, ChevronLeft } from "lucide-react";
+import { RotateCcw, Smartphone, Monitor, ShieldCheck, ShieldAlert, ArrowRight, X, ScanSearch, ChevronLeft, ChevronDown, Bell } from "lucide-react";
 import { SCENARIOS, byId, initState, apply, describe, options, snapshot, timeline, fmtShort, fmtDay, inr, ordinal } from "@/lib/companion/model.mjs";
-import { compose, retrieve, availableActions } from "@/lib/companion/answer.mjs";
+import { retrieve, availableActions } from "@/lib/companion/answer.mjs";
+import { converse, entities } from "@/lib/companion/converse.mjs";
 import { validate } from "@/lib/companion/validate.mjs";
 import { FACTS, SOURCES } from "@/lib/companion/base.mjs";
-import { Conversation, ContextCard, Avatar, MODE, EXPLORE, starterQuestions } from "./Chat";
-import Overview, { OptionList } from "./Overview";
+import { Conversation, SipCard, Orb, GrowwMark, MODE, EXPLORE, starterQuestions, reasonLine } from "./Chat";
+import Overview, { OPT_ICON } from "./Overview";
 import Flow from "./Flow";
 import { sb } from "@/lib/supabase";
 
@@ -19,7 +20,7 @@ function useMedia(q) {
 }
 function anonId() { try { let a = localStorage.getItem("sipc-anon"); if (!a) { a = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now(); localStorage.setItem("sipc-anon", a); } return a; } catch { return "anon-" + Date.now(); } }
 const srcList = (ids) => ids.flatMap((id) => (FACTS[id] ? FACTS[id].src : [])).filter((x, i, a) => a.indexOf(x) === i).map((k) => ({ id: k, ...SOURCES[k] }));
-const opening = () => [{ id: nid(), role: "greet" }];
+const opening = () => [];
 
 /* Readable versions of the structured facts the answer engine sees. */
 const STATUS_TXT = { ACTIVE: "Active", PROCESSING: "Result pending", LAST_INSTALMENT_FAILED: "Last instalment didn't go through", STOPPED: "Stopped" };
@@ -40,7 +41,7 @@ function factRows(snap) {
 }
 
 /* "How this answer was generated": kept out of the conversation, one tap away. */
-function Inspector({ entry, scenario, snap, live, onClose }) {
+function Inspector({ entry, scenario, snap, onClose }) {
   const box = useRef(null);
   useEffect(() => {
     const opener = document.activeElement; box.current && box.current.querySelector("button").focus();
@@ -56,11 +57,11 @@ function Inspector({ entry, scenario, snap, live, onClose }) {
         <header><h2 id="cz-ins-t">How this answer was generated</h2><button type="button" className="cx-ib" aria-label="Close" onClick={onClose}><X size={20} aria-hidden="true" /></button></header>
         <div className="cz-drawer-b">
           <ol className="cz-pipe" aria-label="Answer pipeline">
-            {["Your question", "This SIP's demo data", "Verified help pages", "Answer engine composes it", "15 checks", "Shown, or safe fallback"].map((t, i) => <li key={t}><span>{i + 1}</span>{t}</li>)}
+            {["Your message and the recent conversation", "This SIP's demo data", "Verified help pages", "Conversation engine composes a reply", "15 checks", "Shown, or safe fallback"].map((t, i) => <li key={t}><span>{i + 1}</span>{t}</li>)}
           </ol>
           {!res ? <p className="cz-muted">Ask a question and this panel shows exactly how its answer was produced and checked.</p> : (<>
             <section><h3>Question</h3><p>“{entry.q}”</p></section>
-            <section><h3>How it was produced</h3><p className={"cz-modeline " + cls}>{cls === "ok" ? <ShieldCheck size={16} aria-hidden="true" /> : <ShieldAlert size={16} aria-hidden="true" />}{label}{res.mode === "live" && res.model ? " · " + res.model : ""}</p>
+            <section><h3>How it was produced</h3><p className={"cz-modeline " + cls}>{cls === "ok" ? <ShieldCheck size={16} aria-hidden="true" /> : <ShieldAlert size={16} aria-hidden="true" />}{label}</p>
               {res.note && <p className="cz-muted">{res.note}</p>}
               {res.attempts && res.attempts.length > 0 && <p className="cz-muted">Attempts: {res.attempts.map((x, i) => "#" + (i + 1) + " " + (x.error ? "AI service error (" + x.error.replace(/_/g, " ") + ")" : x.passed ? "passed" : "failed " + x.failed.length + " check" + (x.failed.length > 1 ? "s" : ""))).join(" · ")}{res.attempts.length > 1 ? " · retried once" : ""}</p>}
             </section>
@@ -77,6 +78,8 @@ function Inspector({ entry, scenario, snap, live, onClose }) {
 }
 
 
+const SHORT_OPT = { PAY_MISSED: "Pay missed instalment", ONE_TIME: "One-time investment", CHANGE_DATE: "Change date", LOWER_AMOUNT: "Lower amount", SKIP_NEXT: "Skip next instalment", STOP: "Stop SIP" };
+
 export default function Companion() {
   const [sid, setSid] = useState("A");
   const [s, setS] = useState(() => initState("A"));
@@ -85,16 +88,16 @@ export default function Companion() {
   const [preview, setPreview] = useState("app");
   const [tab, setTab] = useState("chat");
   const [flow, setFlow] = useState(null);
-  const live = false; // no external AI: every answer comes from the on-site retrieval engine
   const [inspect, setInspect] = useState(null); // message id or "latest"
   const [toast, setToast] = useState("");
   const [ctxOpen, setCtxOpen] = useState(false);
-  const [railOpen, setRailOpen] = useState(true);
+  const [headOpen, setHeadOpen] = useState(false);
+  const [railOpen, setRailOpen] = useState(false);
   const [focusKey, setFocusKey] = useState(0);
-  const ver = useRef(0), anon = useRef(null), sRef = useRef(s);
+  const ver = useRef(0), anon = useRef(null), sRef = useRef(s), chatRef = useRef(chat);
   const mobile = useMedia("(max-width: 759px)");
-  const rail = useMedia("(min-width: 1200px)");
-  sRef.current = s;
+  const rail = useMedia("(min-width: 1100px)");
+  sRef.current = s; chatRef.current = chat;
 
   useEffect(() => {
     anon.current = anonId();
@@ -102,66 +105,72 @@ export default function Companion() {
     const qs = (u.get("s") || "").toUpperCase();
     if (byId[qs]) { setSid(qs); setS(initState(qs)); }
     if (u.get("view") === "web") setPreview("web");
-    if (u.get("tab") === "details") setTab("details");
     log("load", { moment: qs || "A" });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 3200); return () => clearTimeout(t); }, [toast]);
 
-  function log(type, data) { try { sb().from("events").insert({ anon_id: anon.current || "anon-unknown", moment: "C2-" + (sid || "A"), type, data: { surface: "companion2.1", ...(data || {}) } }).then(() => {}, () => {}); } catch {} }
+  function log(type, data) { try { sb().from("events").insert({ anon_id: anon.current || "anon-unknown", moment: "C2-" + (sid || "A"), type, data: { surface: "companion3", ...(data || {}) } }).then(() => {}, () => {}); } catch {} }
   function mark(k) { setS((x) => (x.done[k] ? x : { ...x, done: { ...x.done, [k]: true } })); }
 
-  /* A new situation or a reset always starts a fresh conversation, so no answer about another SIP stays on screen. */
+  /* A new situation or a reset starts a fresh conversation, so no answer about another SIP stays on screen. */
   function restart(id, how) {
     ver.current++;
     const st = initState(id);
-    setSid(id); setS(st); setFlow(null); setBusy(false); setInspect(null); setCtxOpen(false); setTab("chat");
-    setChat(how === "switch" ? [{ id: nid(), role: "switch", title: byId[id].title, v: describe(st) }] : opening());
-    if (how === "reset") setToast("Demo reset to its starting state");
+    setSid(id); setS(st); setFlow(null); setBusy(false); setInspect(null); setCtxOpen(false); setHeadOpen(false); setTab("chat");
+    setChat(how === "switch" ? [{ id: nid(), role: "switch", title: byId[id].title, v: describe(st), at: Date.now() }] : opening());
+    if (how === "reset") setToast("Started a new conversation");
   }
-  function pick(id) { restart(id, "switch"); log("scenario", { to: id, via: "chat" }); }
+  function pick(id) { restart(id, "switch"); log("scenario", { to: id }); }
   function reset() { restart(sid, "reset"); log("reset", {}); }
   function explore() {
     if (busy) return;
-    setChat((c) => [...c.map((m) => (m.role === "situations" ? { ...m, stale: true } : m)), { id: nid(), role: "user", text: EXPLORE }, { id: nid(), role: "situations", current: sid }]);
+    setChat((c) => [...c.map((m) => (m.role === "situations" ? { ...m, stale: true } : m)), { id: nid(), role: "user", text: EXPLORE, at: Date.now() }, { id: nid(), role: "situations", current: sid, at: Date.now() }]);
     log("explore", {});
   }
 
-  function openFlow(kind) {
-    setFlow({ kind, step: NEEDS_EDIT[kind] ? "edit" : "review", day: null, amount: "" });
+  function openFlow(kind, pre = {}) {
+    const day = pre.day && pre.day >= 1 && pre.day <= 28 && pre.day !== sRef.current.day ? pre.day : null;
+    const amount = pre.amount && pre.amount < sRef.current.amount && pre.amount >= 100 ? String(pre.amount) : "";
+    const ready = (kind === "CHANGE_DATE" && day) || (kind === "LOWER_AMOUNT" && amount);
+    setFlow({ kind, step: NEEDS_EDIT[kind] && !ready ? "edit" : "review", day, amount });
     mark(kind === "EXPLAIN" ? "understood" : "reviewed"); log("tap_option", { option: kind });
   }
   function confirm() {
     const next = apply(sRef.current, flow.kind, { day: flow.day, amount: Number(String(flow.amount || 0).replace(/[,₹\s]/g, "")) });
     const text = next.log[next.log.length - 1].text.replace(" (simulated)", "");
     setS(next); setFlow({ ...flow, step: "done", result: text + "." });
-    setChat((c) => [...c.map((m) => (m.role === "bot" || m.role === "event" || m.role === "switch" ? { ...m, stale: true } : m)), { id: nid(), role: "event", text: text + " (simulated)." }]);
+    setChat((c) => [...c.map((m) => (m.role === "bot" || m.role === "event" || m.role === "switch" ? { ...m, stale: true } : m)), { id: nid(), role: "event", text: text + " (simulated).", at: Date.now() }]);
     setToast(text + " (simulated)"); log("action", { what: flow.kind });
   }
 
+  /* Conversation memory sent with each message: who said what, the topic, and any open offer. */
+  const historyOf = (c) => c.slice(-10).flatMap((m) => m.role === "user" ? [{ role: "user", text: m.text }] : m.role === "bot" ? [{ role: "bot", intent: m.res.answer.intent, offer: m.res.answer.offer || undefined }] : []);
+
   async function ask(q) {
     if (busy) return;
-    const v = ver.current, st = sRef.current;
-    setTab("chat");
-    setChat((c) => [...c, { id: nid(), role: "user", text: q }]);
+    const v = ver.current, st = sRef.current, history = historyOf(chatRef.current);
+    setTab("chat"); setHeadOpen(false);
+    setChat((c) => [...c, { id: nid(), role: "user", text: q, at: Date.now() }]);
     setBusy(true); mark("understood"); log("ask", { len: q.length });
     const t0 = Date.now();
     let res = null, fail = null;
     try {
-      const r = await fetch("/api/assist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ q, state: st }) });
+      const r = await fetch("/api/assist", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ q, state: st, history }) });
       const j = await r.json().catch(() => ({ error: "bad_response" }));
       if (j.error) fail = j.error; else res = j;
     } catch { fail = "network"; }
-    // Keep the "checking" state on screen long enough to read. This is a display pause only; the answer is already final.
-    const wait = 450 - (Date.now() - t0); if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-    if (v !== ver.current) return; // situation changed or demo reset while waiting: drop the stale answer
-    if (fail === "rate_limited") { setChat((c) => [...c, { id: nid(), role: "err", text: "That's a lot of questions in a minute. Wait a moment, then try again.", retry: q }]); setBusy(false); return; }
-    if (!res) { // server unreachable: answer on this device with the same engine and the same checks
-      const a = compose(st, q); const ids = [...new Set(retrieve(a.intent).concat(a.sources))];
-      const val = validate(a, snapshot(st), q, { retrieved: ids, actions: availableActions(st) });
-      res = { mode: "offline", answer: a, checks: val.checks, passed: val.passed, sources: srcList(a.sources), note: "The server couldn't be reached, so this answer was written and checked on this device." };
+    // Keep "Checking your SIP details…" readable. A display pause only: the reply is already final.
+    const wait = 550 - (Date.now() - t0); if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    if (v !== ver.current) return;
+    if (fail === "rate_limited") { setChat((c) => [...c, { id: nid(), role: "err", text: "That's a lot of messages in a minute. Wait a moment, then try again.", retry: q, at: Date.now() }]); setBusy(false); return; }
+    if (!res) { // server unreachable: the same engine and checks run on this device
+      const a = converse(st, q, history); const ids = [...new Set(retrieve(a.intent).concat(a.sources))]; const ent = entities(q);
+      const val = validate(a, snapshot(st), q, { retrieved: ids, actions: availableActions(st), extraNums: [ent.amount, ent.day] });
+      res = { mode: "offline", answer: a, checks: val.checks, passed: val.passed, sources: srcList(a.sources), note: "The server couldn't be reached, so this reply was composed and checked on this device." };
     }
-    setChat((c) => [...c, { id: nid(), role: "bot", res, q }]);
+    setChat((c) => [...c, { id: nid(), role: "bot", res, q, at: Date.now() }]);
     setBusy(false);
+    if (res.answer && res.answer.ui && res.answer.ui.open) setTimeout(() => openFlow(res.answer.ui.open, res.answer.ui), 380);
     log("reply", { mode: res.mode, passed: res.passed, intent: res.answer && res.answer.intent });
   }
 
@@ -170,44 +179,79 @@ export default function Companion() {
   const tl = useMemo(() => timeline(s), [s]);
   const snap = useMemo(() => snapshot(s), [s]);
   const asked = chat.filter((m) => m.role === "user").map((m) => m.text);
-  const sugg = useMemo(() => starterQuestions(s).filter((t) => !asked.includes(t)).slice(0, 3), [s, asked.join("|")]); // eslint-disable-line react-hooks/exhaustive-deps
+  const lastBot = [...chat].reverse().find((m) => m.role === "bot");
+  const sugg = useMemo(() => {
+    const base = chat.length === 0 ? starterQuestions(s) : (lastBot && lastBot.res.answer.follow && lastBot.res.answer.follow.length ? lastBot.res.answer.follow : starterQuestions(s));
+    return base.filter((t) => !asked.includes(t)).slice(0, 3);
+  }, [s, chat]); // eslint-disable-line react-hooks/exhaustive-deps
   const bots = chat.filter((m) => m.role === "bot");
   const inspected = inspect === null ? null : inspect === "latest" ? bots[bots.length - 1] : chat.find((m) => m.id === inspect);
   const layout = mobile ? "app" : preview;
-  const statusTxt = "Every answer checked";
   const toChat = () => { setTab("chat"); setFocusKey(Date.now()); };
+  const started = chat.length > 0;
 
   const flowEl = flow && <Flow flow={flow} s={s} view={v} setFlow={setFlow} onClose={() => setFlow(null)} onConfirm={confirm} onOpen={openFlow} onAsk={ask} onReset={reset} />;
-  const body = (showContext) => tab === "details"
+  const convo = (web) => tab === "details"
     ? <div className="cx-scroll cz-details"><Overview s={s} v={v} opts={opts} tl={tl} onOpen={openFlow} onAsk={toChat} /></div>
-    : <Conversation s={s} v={v} tl={tl} opts={opts} chat={chat} busy={busy} live={live} sugg={sugg} onAsk={ask} onOpen={openFlow}
+    : <Conversation s={s} v={v} tl={tl} opts={opts} chat={chat} busy={busy} sugg={sugg} onAsk={ask} onOpen={openFlow}
         onInspect={(id) => setInspect(id)} onExplore={explore} onPick={pick} ctxOpen={ctxOpen} setCtxOpen={setCtxOpen}
-        onDetails={() => setTab("details")} showContext={showContext} focusKey={focusKey} />;
-  const header = (cls) => (
-    <header className={cls}>
-      {tab === "details" ? <button type="button" className="cx-ib" aria-label="Back to the conversation" onClick={toChat}><ChevronLeft size={22} aria-hidden="true" /></button> : <Avatar size={38} alive busy={busy} />}
-      <div className="cz-id"><b>{tab === "details" ? "SIP details" : "SIP Companion"}</b><span><i className={"cz-dot" + (live ? " live" : "")} aria-hidden="true" />{tab === "details" ? "Sample fund · illustrative" : statusTxt}</span></div>
-      {cls.includes("web") && <span className="cx-demo-tag">Demo data</span>}
-      <button type="button" className="cx-ib cz-hreset" aria-label="Start over" title="Start over" onClick={reset}><RotateCcw size={18} aria-hidden="true" /></button>
+        onDetails={() => setTab("details")} showCard={!(web && rail)} focusKey={focusKey} />;
+
+  /* Compact identity header once the conversation has started; the SIP card drops down from the subtitle. */
+  const head = (web) => (tab === "details" ? (
+    <header className="cz-head2"><button type="button" className="cx-ib" aria-label="Back to the conversation" onClick={toChat}><ChevronLeft size={22} aria-hidden="true" /></button><b>SIP details</b><span /></header>
+  ) : started ? (
+    <header className={"cz-head2" + (web ? " web" : "")}>
+      <span />
+      <div className="cz-idc">
+        <Orb size={web ? 54 : 44} state={busy ? "think" : "idle"} halo />
+        <b>SIP Companion</b>
+        {web && rail ? <span className="cz-subl">Let's review your {inr(s.amount)} SIP</span> :
+          <button type="button" className="cz-subl btn" aria-expanded={headOpen} aria-controls="cz-headcard" onClick={() => setHeadOpen(!headOpen)}>Let's review your {inr(s.amount)} SIP<ChevronDown size={14} aria-hidden="true" /></button>}
+      </div>
+      <button type="button" className="cx-ib cz-hreset" aria-label="Start a new conversation" title="New conversation" onClick={reset}><RotateCcw size={18} aria-hidden="true" /></button>
     </header>
+  ) : (
+    <header className="cz-head2 bare"><span /><span /><button type="button" className="cx-ib cz-hreset" aria-label="Start a new conversation" title="New conversation" onClick={reset}><RotateCcw size={18} aria-hidden="true" /></button></header>
+  ));
+  const headCard = started && tab === "chat" && !(layout === "web" && rail) && (
+    <div className={"cz-headcard" + (headOpen ? " open" : "")} id="cz-headcard" inert={!headOpen}><div><SipCard s={s} v={v} tl={tl} open={ctxOpen} onToggle={() => setCtxOpen(!ctxOpen)} onDetails={() => setTab("details")} id="cz-sip2" /></div></div>
   );
 
   const appScreen = (
     <div className="cx-app cz-app">
-      {header("cz-head")}
-      <div className="cx-app-body">{body(true)}</div>
+      {head(false)}{headCard}
+      <div className="cx-app-body">{convo(false)}</div>
       {flowEl}
     </div>
   );
+  const sumRows = [["Current SIP", inr(s.amount) + " / month"], ["Fund", "Sample fund (illustrative)"], ["Next date", v.nx ? fmtDay(v.nx) : "None"], ["Missed in a row", v.n + " of 3"]];
   const webScreen = (
     <div className="cx-web cz-webapp">
-      {header("cz-head web")}
+      <nav className="cz-appnav" aria-label="Demo app">
+        <span className="cz-brand"><GrowwMark size={26} />Groww-style app</span>
+        <span className="cz-navtab" aria-current="page">SIP Companion</span>
+        <span className="cx-demo-tag">Demo data</span>
+      </nav>
       <div className={"cz-webgrid" + (rail ? " rail" : "")}>
-        <section className="cz-webmain" aria-label="SIP Companion conversation">{body(!rail)}</section>
-        {rail && <aside className="cz-rail" aria-label="Your SIP">
-          <ContextCard s={s} v={v} tl={tl} open={railOpen} onToggle={() => setRailOpen(!railOpen)} onDetails={() => setTab("details")} rail />
-          <OptionList opts={opts} onOpen={openFlow} title="Your options" sub="Each one is reviewed before anything changes. Nothing here is real." />
-        </aside>}
+        <section className="cz-webmain" aria-label="SIP Companion conversation">{head(true)}{headCard}{convo(true)}</section>
+        {rail && (
+          <aside className="glass cz-panel" aria-label="Your SIP summary and options">
+            <h2>Your SIP summary &amp; options</h2>
+            <dl className="cz-sum">
+              {sumRows.slice(0, 1).map(([k, x]) => <div key={k}><dt>{k}</dt><dd>{x}</dd></div>)}
+              <div><dt>Status</dt><dd><span className={"cz-tag t-" + v.tone}>{v.label}</span></dd></div>
+              {sumRows.slice(1).map(([k, x]) => <div key={k}><dt>{k}</dt><dd>{x}</dd></div>)}
+            </dl>
+            <p className="cz-panel-r">{reasonLine(s)}</p>
+            <div className="cz-panel-acts">
+              {opts.filter((o) => o.available && o.id !== "EXPLAIN").map((o) => { const I = OPT_ICON[o.id]; return <button key={o.id} type="button" onClick={() => openFlow(o.id)} title={o.sub}>{I && <I size={17} aria-hidden="true" />}{SHORT_OPT[o.id] || o.title}</button>; })}
+            </div>
+            <p className="cz-panel-n">Each option is reviewed before anything changes. Nothing here is real.</p>
+            <button type="button" className="cz-panel-more" aria-expanded={railOpen} onClick={() => setRailOpen(!railOpen)}>{railOpen ? "Hide history" : "Show history"}<ChevronDown size={15} aria-hidden="true" /></button>
+            {railOpen && <div className="cz-panel-tl"><TimelineMini tl={tl} /></div>}
+          </aside>
+        )}
       </div>
       {flowEl}
     </div>
@@ -216,7 +260,7 @@ export default function Companion() {
   return (
     <div className={"cx cz" + (mobile ? " is-mobile" : "")}>
       {!mobile && (
-        <div className="cz-bar" role="toolbar" aria-label="Demo controls">
+        <div className="cz-bar" role="toolbar" aria-label="Preview controls">
           <span className="cz-sp" />
           <div className="cx-seg" role="group" aria-label="Preview">
             <button type="button" aria-pressed={preview === "app"} onClick={() => setPreview("app")}><Smartphone size={16} aria-hidden="true" />App</button>
@@ -226,17 +270,18 @@ export default function Companion() {
           <a className="cx-btn quiet sm cz-built" href="/built">How it's built<ArrowRight size={15} aria-hidden="true" /></a>
         </div>
       )}
-
-      {mobile ? <div className="cz-mobile">{appScreen}</div> : layout === "app" ? (
-        <div className="cz-stage app">
+      <div className={"cz-stage " + layout + (mobile ? " mob" : "")}>
+        <i className="cz-blob a" aria-hidden="true" /><i className="cz-blob b" aria-hidden="true" /><i className="cz-slab" aria-hidden="true" />
+        {mobile ? appScreen : layout === "app" ? (
           <div className="cx-phone"><div className="cx-phone-scr"><div className="cx-sb" aria-hidden="true"><span>9:41</span><i className="island" /><span className="sig">5G ▮</span></div>{appScreen}</div></div>
-        </div>
-      ) : (
-        <div className="cz-stage web">{webScreen}</div>
-      )}
-
+        ) : webScreen}
+      </div>
       <p className="cx-toast" role="status" aria-live="polite">{toast}</p>
-      {inspect !== null && <Inspector entry={inspected} scenario={byId[sid].title} snap={snap} live={live} onClose={() => setInspect(null)} />}
+      {inspect !== null && <Inspector entry={inspected} scenario={byId[sid].title} snap={snap} onClose={() => setInspect(null)} />}
     </div>
   );
+}
+
+function TimelineMini({ tl }) {
+  return <ol className="cz-tlmini">{tl.slice(-5).map((r, i) => <li key={i} className={"k-" + r.kind}><span>{fmtShort(r.date)}</span><b>{r.title}</b></li>)}</ol>;
 }

@@ -1,5 +1,5 @@
 {
- "ranAt": "2026-11-02T08:47:34.671Z",
+ "ranAt": "2026-11-02T09:20:48.127Z",
  "node": "v22.22.0",
  "golden": {
   "n": 37,
@@ -580,6 +580,215 @@
    "pass": true
   }
  ],
+ "dialogues": {
+  "n": 7,
+  "passed": 7,
+  "turns": 24,
+  "turnsPassed": 24,
+  "unsafeShown": 0,
+  "cases": [
+   {
+    "id": "D1",
+    "scenario": "A",
+    "turns": [
+     {
+      "q": "hello",
+      "intent": "CHAT",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "yes",
+      "intent": "STATUS",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "why?",
+      "intent": "WHY",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "ok",
+      "intent": "CHAT",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "thanks",
+      "intent": "CHAT",
+      "ok": true,
+      "passed": true
+     }
+    ],
+    "pass": true,
+    "unsafeShown": 0
+   },
+   {
+    "id": "D2",
+    "scenario": "A",
+    "turns": [
+     {
+      "q": "can I reduce my SIP to ₹1,500?",
+      "intent": "LOWER",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "yes",
+      "intent": "CHAT",
+      "ok": true,
+      "passed": true
+     }
+    ],
+    "pass": true,
+    "unsafeShown": 0
+   },
+   {
+    "id": "D3",
+    "scenario": "C",
+    "turns": [
+     {
+      "q": "salary comes on the 1st, can the SIP come after that?",
+      "intent": "CHANGE_DATE",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "how",
+      "intent": "CHANGE_DATE",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "no",
+      "intent": "CHAT",
+      "ok": true,
+      "passed": true
+     }
+    ],
+    "pass": true,
+    "unsafeShown": 0
+   },
+   {
+    "id": "D4",
+    "scenario": "B",
+    "turns": [
+     {
+      "q": "hi",
+      "intent": "CHAT",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "why did it fail",
+      "intent": "WHY",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "how come",
+      "intent": "WHY",
+      "ok": true,
+      "passed": true
+     }
+    ],
+    "pass": true,
+    "unsafeShown": 0
+   },
+   {
+    "id": "D5",
+    "scenario": "E",
+    "turns": [
+     {
+      "q": "hey",
+      "intent": "CHAT",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "yes",
+      "intent": "STATUS",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "and then",
+      "intent": "CONSEQUENCE",
+      "ok": true,
+      "passed": true
+     }
+    ],
+    "pass": true,
+    "unsafeShown": 0
+   },
+   {
+    "id": "D6",
+    "scenario": "A",
+    "turns": [
+     {
+      "q": "what is NAV",
+      "intent": "LEARN",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "is my money safe",
+      "intent": "LEARN",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "how do I withdraw my money",
+      "intent": "LEARN",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "I'm really worried",
+      "intent": "AFFORD",
+      "ok": true,
+      "passed": true
+     }
+    ],
+    "pass": true,
+    "unsafeShown": 0
+   },
+   {
+    "id": "D7",
+    "scenario": "D",
+    "turns": [
+     {
+      "q": "who are you",
+      "intent": "CHAT",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "tell me a joke",
+      "intent": "OUT_OF_SCOPE",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "fgjhk asdf",
+      "intent": "CLARIFY",
+      "ok": true,
+      "passed": true
+     },
+     {
+      "q": "should I invest more?",
+      "intent": "ADVICE",
+      "ok": true,
+      "passed": true
+     }
+    ],
+    "pass": true,
+    "unsafeShown": 0
+   }
+  ]
+ },
  "legacy": {
   "n": 27,
   "recorded": 27,

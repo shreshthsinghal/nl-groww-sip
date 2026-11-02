@@ -42,17 +42,24 @@ export default async function Built() {
         <p className="note">SIP Companion is a chat assistant inside a Groww-style app for first-time mutual fund investors. It explains one SIP in plain words: its status, missed instalments, payment dates, the options available and what each option leads to. When an instalment slips, it lays out paying, changing the date, lowering the amount, skipping and stopping side by side, with no pressure towards any of them. It never recommends funds, predicts returns or tells anyone whether to invest.</p>
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>How to use it</h3>
         <ul className="limits">
-          <li><b>Start from the greeting.</b> Pick a suggested question or type anything in your own words; the suggestions are starters, not limits. Follow-up questions continue the same conversation.</li>
+          <li><b>Start from the greeting.</b> Pick a suggested question, type anything in your own words, or tap the microphone to speak (in browsers that support it). Follow-ups like "why?" or "yes" continue the same conversation.</li>
           <li><b>Check an answer.</b> Each answer carries a Checked badge and a source count. The badge opens "How this answer was generated"; the sources expand to the verified help-page text and links.</li>
-          <li><b>See the SIP.</b> The small card above the chat shows the amount, status, misses in a row and the reason (confirmed or not). "View SIP details" opens the timeline, next instalment and Pay Now window.</li>
+          <li><b>See the SIP.</b> The glass card on the greeting (and under "Let's review your SIP" once you start chatting, or in the side panel on the web) shows the amount, status, misses in a row and the reason, confirmed or not. "View SIP details" opens the timeline, next instalment and Pay Now window.</li>
           <li><b>Try an option.</b> Every option is reviewed first, then confirmed or cancelled. The result is simulated: no money moves and no real SIP changes.</li>
           <li><b>Change the situation.</b> Choose "Explore another situation" in the chat, or start typing: matching questions and situations appear above the message box. A new situation starts a fresh conversation. App and Web previews share one conversation.</li>
         </ul>
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>The {SCENARIOS.length} illustrative situations</h3>
         <ul className="limits">{SCENARIOS.map((x) => <li key={x.id}><b>{x.title}.</b> {x.blurb}.</li>)}</ul>
         <p className="note">All data is illustrative: a sample fund, a fixed demo date of 26 Oct 2026, no names, PAN or account numbers.</p>
-        <h3 className="sec" style={{ fontSize: "1.25rem" }}>No external AI, no API keys</h3>
-        <p className="note">The Companion does not call any outside AI service. Every answer is composed on this site by a retrieval engine: it reads the question, retrieves the SIP's facts and the verified help-page passages it needs, composes the reply and runs the {CHECKS.length} checks before showing it. While it works, the chat says "Checking your SIP details…" rather than pretending to generate text.</p>
+        <h3 className="sec" style={{ fontSize: "1.25rem" }}>How it holds a conversation without an AI service</h3>
+        <p className="note">The Companion doesn't call any outside AI service and needs no API key. A conversation engine on this site handles each message in four steps:</p>
+        <ul className="limits">
+          <li><b>Understand.</b> It reads your message and the last ten turns. It recognises greetings, thanks and how you're feeling, a "yes" or "no" to its own last question, follow-ups like "why?", "how?" or "what about next month?", and amounts or dates you type ("₹1,500", "1.5k", "the 5th").</li>
+          <li><b>Retrieve.</b> It pulls this SIP's data and the verified facts the reply needs: Groww Help pages for product rules, plus AMFI and SEBI material for SIP basics such as NAV, withdrawals, exit loads and lock-ins.</li>
+          <li><b>Compose.</b> It writes the reply from those facts, with varied wording, a next step it offers ("Want to review lowering it to ₹1,500?") and follow-up suggestions. Saying yes opens that review already filled in.</li>
+          <li><b>Check.</b> The same {CHECKS.length} checks decide whether the reply is shown. If it doesn't match a topic, the engine searches example questions; if nothing is close, it says it isn't sure and offers the nearest questions instead of guessing.</li>
+        </ul>
+        <p className="note">What this is not: a large language model. Wording comes from the engine's phrasing, not from free generation, and topics outside SIPs are politely declined. While it works, the chat says "Checking your SIP details…", held for about half a second so it can be read; the reply is final before it appears.</p>
       </section>
 
       <section className="sh" id="evaluation" style={{ gap: 16, scrollMarginTop: 80 }} aria-labelledby="ev-h">
@@ -75,7 +82,7 @@ export default async function Built() {
           <li><b>"How this answer was generated"</b> opens from each answer's Checked chip: the question, how it was produced, all {CHECKS.length} checks, the verified material used and the SIP facts available. Nothing in the browser can skip the checks; offline answers are checked on the device with the same code.</li>
           <li><b>Every option is a real, simulated flow</b>: pay the missed instalment, change the date, lower the amount, skip the next one, or stop. Each is reviewed, then confirmed or cancelled, and the result says no money moved. Stopping has no extra steps. Changing the scenario or resetting clears the conversation.</li>
           <li><b>App and Web previews</b> render the same components and share one conversation: a phone app, and a desktop page with the SIP and its options in a side panel. Light and dark themes, keyboard use and reduced motion are supported.</li>
-          <li><b>Honest waiting states.</b> Answers arrive in well under a second, so the "Checking your SIP details…" indicator is held for at least 0.45 s to stay readable. The answer is already final by then; nothing is streamed or typed out to look like live AI.</li>
+          <li><b>Honest waiting states.</b> Answers arrive in well under a second, so the "Checking your SIP details…" indicator is held for at least 0.55 s to stay readable. The answer is already final by then; nothing is streamed or typed out to look like live AI.</li>
         </ul>
 
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>Results from the last run</h3>
@@ -84,6 +91,7 @@ export default async function Built() {
           <div className={"stat " + (g.passed / g.n >= R.bars.goldenPass ? "ok" : "bad")}><b>{g.passed}/{g.n}</b><span>Golden questions fully passed ({pct(g.passed, g.n)})</span><small>Safety checks plus expected content</small></div>
           <div className={"stat " + (g.unsafeShown === 0 ? "ok" : "bad")}><b>{g.unsafeShown}</b><span>Unsafe answers shown</span><small>Bar: 0</small></div>
           <div className={"stat " + (red.blocked === red.n ? "ok" : "bad")}><b>{red.blocked}/{red.n}</b><span>Unsafe model answers blocked</span><small>Each replaced by a checked fallback</small></div>
+          {R.dialogues && <div className={"stat " + (R.dialogues.unsafeShown === 0 ? "ok" : "bad")}><b>{R.dialogues.turnsPassed}/{R.dialogues.turns}</b><span>Conversation turns as expected</span><small>{R.dialogues.n} multi-turn dialogues: small talk, "yes", "why?", amounts, dates, SIP basics</small></div>}
           <div className="stat"><b>{pct(g.fallbacks, g.n)}</b><span>Fallback rate on golden questions</span><small>{g.byMode.guard || 0} of {g.n} answered by the guard (personal data or off-topic)</small></div>
         </div>
         <div className="tw"><table>

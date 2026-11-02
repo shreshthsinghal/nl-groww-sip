@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ArrowUp, ChevronDown, ShieldCheck, ShieldAlert, ExternalLink, Info, CircleCheck, BookOpen, ChevronRight, Shuffle } from "lucide-react";
+import { ChevronDown, ShieldCheck, ShieldAlert, ExternalLink, Info, CircleCheck, BookOpen, Shuffle, Mic, SendHorizontal, CornerDownLeft } from "lucide-react";
 import { FACTS, SOURCES } from "@/lib/companion/base.mjs";
 import { SCENARIOS, fmtShort, fmtDay, inr, ordinal, lastAttempt, consecutive } from "@/lib/companion/model.mjs";
 import { OPT_ICON, STATUS_ICON, Timeline } from "./Overview";
@@ -11,37 +11,38 @@ export const EXPLORE = "Explore another situation";
 
 /* How each answer was produced, in plain words. "ok" answers passed every check. */
 export const MODE = {
-  live: ["ok", "Checked · written by live AI"], demo: ["ok", "Checked · composed from this SIP's data and verified help pages (no external AI)"], guard: ["ok", "Checked · answered without AI"],
-  fallback: ["warn", "Safe fallback · the AI's draft was held back"], provider_down: ["warn", "AI unavailable · checked guided answer"],
+  demo: ["ok", "Checked · composed from this SIP's data and verified help pages (no external AI)"], guard: ["ok", "Checked · answered by the safety guard"],
+  live: ["ok", "Checked"], fallback: ["warn", "Safe fallback"], provider_down: ["warn", "Safe fallback"],
   offline: ["warn", "Offline · checked on this device"], blocked: ["warn", "Safe reply"]
 };
+const SHORT = { PAY_MISSED: "Pay missed instalment", ONE_TIME: "One-time investment", CHANGE_DATE: "Change date", LOWER_AMOUNT: "Lower amount", SKIP_NEXT: "Skip next", STOP: "Stop SIP" };
 
-/* Scenario-aware starter questions. Each one is answered by the same engine and checks as typed questions. */
+/* Scenario-aware starter questions. Each goes through the same engine and checks as typed messages. */
 export function starterQuestions(s) {
   const la = lastAttempt(s), n = consecutive(s);
-  if (s.stopped) return ["What happens to what I've invested?", "Can I start again later?", "What does my status mean?"];
-  if (la && la.result === "pending") return ["Why does it say pending?", "Should I pay it again?", "What happens if it fails?", "When will I know the result?"];
+  if (s.stopped) return ["What happens to what I've invested?", "Can I start again later?", "How do I withdraw?"];
+  if (la && la.result === "pending") return ["Why does it say pending?", "Should I pay it again?", "What happens if it fails?"];
   if (la && la.result === "failed") {
     const known = la.reason && la.reason.state === "confirmed";
-    if (!known) return ["Why did the payment fail?", "How can I find the reason?", "What happens to my next instalment?", "Can I change my SIP date?"];
-    if (n >= 2) return ["Why did my last instalment fail?", "What happens if I miss the next one?", "What if money is tight this month?", "Will my existing investments be affected?", "Can I change my SIP date?"];
-    return ["Does one missed instalment cancel my SIP?", "Can I still resolve it?", "What happens next month?", "Can I change my SIP date?"];
+    if (!known) return ["Why did the payment fail?", "What should I check first?", "Can I change my SIP date?"];
+    if (n >= 2) return ["Why did my last instalment fail?", "What happens if I miss the next one?", "What if money is tight this month?"];
+    return ["Does one missed instalment cancel my SIP?", "Can I still resolve it?", "Can I change my SIP date?"];
   }
-  if (s.tight) return ["What if I cannot afford this month's SIP?", "Can I lower the future amount?", "Can I change the payment date?", "What happens if I pause or stop?"];
-  return ["When is my next instalment?", "What happens if I want to pause?", "Can I lower the future amount?", "What does my status mean?"];
+  if (s.tight) return ["What if I cannot afford this month's SIP?", "Can I lower the future amount?", "Can I change the payment date?"];
+  return ["When is my next instalment?", "What happens if I want to pause?", "What is a SIP?"];
 }
 
-/* Typeahead pool: questions people ask, plus the demo situations, matched to what's being typed. */
-const EXTRA_Q = ["What does my status mean?", "When is my next instalment?", "Can I skip next month?", "How do I stop my SIP?", "Will I be charged a fee?", "Can I lower the future amount?", "Can I change my SIP date?", "What happens to what I've invested?"];
+/* Typeahead: questions people ask plus the demo situations, matched to what's being typed. */
+const EXTRA_Q = ["What does my status mean?", "When is my next instalment?", "Can I skip next month?", "How do I stop my SIP?", "Will I be charged a fee?", "Can I lower the future amount?", "Can I change my SIP date?", "What happens to what I've invested?", "What is a SIP?", "What is NAV?", "How do I withdraw?", "Is my money guaranteed?", "What is an exit load?", "What is the minimum SIP amount?", "Can I reduce my SIP to ₹1,500?", "Can I move my SIP to the 5th?"];
 const SIT_WORDS = { A: "two missed miss misses row failed fail insufficient balance cancel", B: "unknown reason failed fail why bank", C: "tight money afford salary short cash broke", D: "one missed miss failed first", E: "pending processing waiting debit today result" };
-const words = (t) => String(t).toLowerCase().match(/[a-z]{3,}/g) || [];
+const words = (t) => String(t).toLowerCase().match(/[a-z0-9]{2,}/g) || [];
 function score(text, qw) { const tw = words(text); return qw.reduce((n, w) => n + (tw.some((x) => x.startsWith(w) || w.startsWith(x)) ? 1 : 0), 0); }
 export function typeahead(s, q, asked) {
   const qw = words(q);
   const pool = [...new Set(starterQuestions(s).concat(EXTRA_Q))].filter((t) => !asked.includes(t));
   const qs = qw.length ? pool.map((t) => [t, score(t, qw)]).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).map(([t]) => t) : starterQuestions(s).filter((t) => !asked.includes(t));
   const sits = SCENARIOS.map((x) => [x, qw.length ? score(x.title + " " + x.blurb + " " + SIT_WORDS[x.id], qw) : 1]).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).map(([x]) => x);
-  return { qs: qs.slice(0, 3), sits: sits.slice(0, qw.length ? 2 : 5) };
+  return { qs: qs.slice(0, 4), sits: sits.slice(0, qw.length ? 2 : 5) };
 }
 
 /* Plain-language reason line. Only a confirmed reason is stated as fact. */
@@ -57,44 +58,48 @@ export function reasonLine(s) {
 
 /* The case study's original Groww-style mark: violet tile, rising line, pink dot. Not Groww's real logo. */
 export function GrowwMark({ size = 36 }) {
-  return <svg width={size} height={size} viewBox="0 0 56 56" focusable="false"><rect width="56" height="56" rx="16" fill="#4127A0" /><polyline points="12,38 22,28 29,33 42,18" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="42" cy="18" r="5" fill="#FF7A8E" /></svg>;
-}
-export function Avatar({ size = 36, alive = false, busy = false }) {
-  return <span className={"cz-av" + (alive ? " alive" : "") + (busy ? " busy" : "")} style={{ width: size, height: size }} aria-hidden="true"><GrowwMark size={size} /></span>;
+  return <svg width={size} height={size} viewBox="0 0 56 56" focusable="false" aria-hidden="true"><rect width="56" height="56" rx="16" fill="#4127A0" /><polyline points="12,38 22,28 29,33 42,18" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="42" cy="18" r="5" fill="#FF7A8E" /></svg>;
 }
 
-/* Smoothly expanding region. Closed content is inert, so it can't be tabbed into. */
+/* The companion's face: a glowing orb that breathes, blinks, and looks around while it works. */
+export function Orb({ size = 40, state = "idle", halo = false }) {
+  return (
+    <span className={"orb " + state + (halo ? " halo" : "")} style={{ "--o": size + "px" }} aria-hidden="true">
+      <span className="orb-glow" /><span className="orb-ball"><span className="orb-face"><i /><i /><b /></span></span>
+    </span>
+  );
+}
+export const Avatar = ({ size = 30, busy }) => <Orb size={size} state={busy ? "think" : "idle"} />;
+
 function Reveal({ open, children, id }) {
   return <div id={id} className={"cz-reveal" + (open ? " open" : "")} inert={!open}><div>{children}</div></div>;
 }
+const clock = (t) => (t ? new Date(t).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }) : "");
 
-/* Compact SIP context: amount, status, misses in a row, reason. Full details expand on request. */
-export function ContextCard({ s, v, tl, open, onToggle, onDetails, rail }) {
+/* Glass SIP card: amount, status, misses in a row and the reason; details expand on request. */
+export function SipCard({ s, v, tl, open, onToggle, onDetails, id = "cz-sip" }) {
   const Icon = STATUS_ICON[v.icon] || Info;
   const showMeter = !s.stopped && (v.n > 0 || (v.la && v.la.result === "failed"));
-  const rid = rail ? "cz-ctx-rail" : "cz-ctx-more";
   return (
-    <section className={"cz-ctx t-" + v.tone + (open ? " open" : "") + (rail ? " rail" : "")} aria-label="Your SIP">
-      <div className="cz-ctx-row">
-        <div className="cz-ctx-amt"><b>{inr(s.amount)}</b><span>/month</span></div>
-        <span className="cx-pill"><Icon size={15} aria-hidden="true" />{v.label}</span>
+    <section className={"glass cz-sip t-" + v.tone + (open ? " open" : "")} aria-label="Your SIP">
+      <div className="cz-sip-top">
+        <div><span className="cz-sip-k">Monthly SIP of</span><b className="cz-sip-v">{inr(s.amount)}</b></div>
+        <span className="cz-tag"><Icon size={14} aria-hidden="true" />{v.label}</span>
       </div>
-      <div className="cz-ctx-row sub">
-        {showMeter && <span className="cz-meter" role="img" aria-label={v.n + " of 3 missed in a row. 3 in a row cancels a monthly SIP."}>{[0, 1, 2].map((i) => <i key={i} className={i < v.n ? "on" : ""} />)}<em>{v.n} of 3 missed in a row</em></span>}
-        <span className="cz-ctx-r">{reasonLine(s)}</span>
-        <button type="button" className="cz-ctx-t" aria-expanded={open} aria-controls={rid} onClick={onToggle}>{open ? "Hide details" : "View SIP details"}<ChevronDown size={16} aria-hidden="true" /></button>
-      </div>
-      <Reveal open={open} id={rid}>
-        <div className="cz-ctx-more">
+      {showMeter && <span className="cz-meter" role="img" aria-label={v.n + " of 3 missed in a row. 3 in a row cancels a monthly SIP."}>{[0, 1, 2].map((i) => <i key={i} className={i < v.n ? "on" : ""} />)}<em>{v.n} of 3 missed in a row</em></span>}
+      <p className="cz-sip-r">{reasonLine(s)}</p>
+      <button type="button" className="cz-sip-t" aria-expanded={open} aria-controls={id} onClick={onToggle}>{open ? "Hide details" : "View SIP details"}<ChevronDown size={16} aria-hidden="true" /></button>
+      <Reveal open={open} id={id}>
+        <div className="cz-sip-more">
           <dl>
             <div><dt>Next instalment</dt><dd>{v.nx ? inr(s.amount) + " on " + fmtDay(v.nx) : "None"}</dd></div>
             <div><dt>Last attempt</dt><dd>{v.la ? fmtShort(v.la.date) + " · " + ({ paid: "Paid", failed: "Didn't go through", pending: "Waiting for the bank", late: "Paid with Pay Now" }[v.la.result] || "—") : "—"}</dd></div>
             {v.pnOpen && <div><dt>Pay Now open until</dt><dd>{fmtDay(v.pn)}</dd></div>}
             <div><dt>Instalment day</dt><dd>{ordinal(s.day)} of each month</dd></div>
+            <div><dt>Fund</dt><dd>Sample fund (illustrative)</dd></div>
           </dl>
           <Timeline rows={tl} max={4} title="Recent activity" />
-          {onDetails && <button type="button" className="cx-link" onClick={onDetails}>All SIP details and options<ChevronRight size={16} aria-hidden="true" /></button>}
-          <p className="cz-ctx-demo">Illustrative demo data · not a real Groww account</p>
+          {onDetails && <button type="button" className="cx-link" onClick={onDetails}>All SIP details and options</button>}
         </div>
       </Reveal>
     </section>
@@ -112,82 +117,83 @@ function SourceList({ ids }) {
   );
 }
 
-export function OptionRows({ ids, opts, onOpen, label = "Options you can review" }) {
+/* Option tiles: every choice looks the same, so none is pushed. */
+export function Tiles({ ids, opts, onOpen, label = "Options you can review" }) {
   const rows = ids.map((id) => opts.find((o) => o.id === id)).filter(Boolean).filter((o) => o.id !== "EXPLAIN");
   if (!rows.length) return null;
   return (
-    <div className="cz-opts" role="group" aria-label={label}>
-      <p className="cz-lbl">{label}</p>
+    <div className="cz-tiles" role="group" aria-label={label}>
       {rows.map((o, i) => { const I = OPT_ICON[o.id] || BookOpen; return (
-        <button key={o.id} type="button" style={{ "--i": i }} className={o.available ? "" : "na"} onClick={() => onOpen(o.id)}>
-          <span className="ic"><I size={17} aria-hidden="true" /></span><span className="tx"><b>{o.title}</b><span>{o.sub}</span></span><ChevronRight size={16} aria-hidden="true" />
+        <button key={o.id} type="button" style={{ "--i": i }} className={o.available ? "" : "na"} onClick={() => onOpen(o.id)} title={o.sub}>
+          <span className="ic"><I size={18} aria-hidden="true" /></span><span>{SHORT[o.id] || o.title}</span>
         </button>); })}
     </div>
   );
 }
 
-/* One assistant answer. Headings appear only when the answer has enough parts to need them. */
 function Answer({ m, opts, onOpen, onInspect }) {
   const res = m.res, a = res.answer, [cls, label] = MODE[res.mode] || MODE.blocked;
   const [srcOpen, setSrcOpen] = useState(false);
-  const blocks = [["What we know", a.known], ["What this means", a.means], ["What you can do", a.todo]].filter(([, x]) => x && x.length);
-  const structured = blocks.length >= 3;
+  const paras = [].concat(a.known, a.means, a.todo).filter(Boolean);
   const passed = res.checks.filter((c) => c.ok).length;
   const srcIds = (a.sources || []).filter((id) => FACTS[id]);
   return (
-    <div className="cz-bubble bot">
-      {blocks.map(([h, x], i) => <div key={i} className="cz-blk">{structured && i > 0 && <p className="cz-lbl">{h}</p>}<p>{x.join(" ")}</p></div>)}
-      {a.uncertain && a.uncertain.length > 0 && <p className="cz-unc"><Info size={15} aria-hidden="true" /><span><b>Still uncertain. </b>{a.uncertain.join(" ")}</span></p>}
-      {!m.stale && <OptionRows ids={a.actions || []} opts={opts} onOpen={onOpen} />}
+    <div className="cz-ans">
+      <div className="cz-bubble bot">
+        {paras.map((p, i) => <p key={i} style={{ "--i": i }}>{p}</p>)}
+        {a.uncertain && a.uncertain.length > 0 && <p className="cz-unc" style={{ "--i": paras.length }}><Info size={15} aria-hidden="true" /><span>{a.uncertain.join(" ")}</span></p>}
+        <time className="cz-time">{clock(m.at)}</time>
+      </div>
       <div className="cz-meta">
         <button type="button" className={"cz-verify " + cls} onClick={() => onInspect(m.id)} aria-label={label + ". " + passed + " of " + res.checks.length + " checks passed. Open how this answer was generated."}>
           {cls === "ok" ? <ShieldCheck size={15} aria-hidden="true" /> : <ShieldAlert size={15} aria-hidden="true" />}<span>{cls === "ok" ? "Checked" : label.split(" · ")[0]}</span><span className="n">{passed}/{res.checks.length}</span>
         </button>
-        {srcIds.length > 0 && (
-          <button type="button" className="cz-srcbtn" aria-expanded={srcOpen} aria-controls={"src-" + m.id} onClick={() => setSrcOpen(!srcOpen)}>
-            <BookOpen size={15} aria-hidden="true" />{srcIds.length} source{srcIds.length > 1 ? "s" : ""}<ChevronDown size={14} aria-hidden="true" className={srcOpen ? "up" : ""} />
-          </button>
-        )}
-        <span className="cz-mode">{res.mode === "live" ? "Live AI" : res.mode === "demo" ? "From verified sources" : res.mode === "guard" ? "Safe reply" : res.mode === "offline" ? "Offline" : "Fallback"}</span>
+        <span className="cz-mode">{res.mode === "demo" ? "From verified sources" : res.mode === "guard" ? "Safety guard" : res.mode === "offline" ? "Offline" : "Safe reply"}</span>
       </div>
-      {srcIds.length > 0 && <Reveal open={srcOpen} id={"src-" + m.id}><SourceList ids={srcIds} /></Reveal>}
+      {srcIds.length > 0 && (
+        <div className={"glass cz-srcs" + (srcOpen ? " open" : "")}>
+          <button type="button" aria-expanded={srcOpen} aria-controls={"src-" + m.id} onClick={() => setSrcOpen(!srcOpen)}><span>Sources <em>({srcIds.length})</em></span><ChevronDown size={18} aria-hidden="true" /></button>
+          <Reveal open={srcOpen} id={"src-" + m.id}><SourceList ids={srcIds} /></Reveal>
+        </div>
+      )}
+      {!m.stale && <Tiles ids={a.actions || []} opts={opts} onOpen={onOpen} />}
     </div>
   );
 }
 
-function Typing({ live }) {
+function Typing() {
   return (
     <div className="cz-row bot cz-msg" role="status">
-      <Avatar size={30} busy />
-      <div className="cz-typing"><span className="dots" aria-hidden="true"><i /><i /><i /></span><span>{live ? "Writing an answer, then checking it…" : "Checking your SIP details…"}</span></div>
+      <Orb size={30} state="think" />
+      <div className="cz-typing"><span className="dots" aria-hidden="true"><i /><i /><i /></span><span>Checking your SIP details…</span></div>
     </div>
   );
 }
 
-function Greeting({ sugg, onSend, onExplore }) {
-  return (
-    <div className="cz-greet">
-      <Avatar size={46} alive />
-      <h2 className="cz-g1">Hi! I'm your SIP Companion.</h2>
-      <p className="cz-g2">Ask me, in your own words, about your SIP's status, missed instalments, payment dates, your options and what each one leads to.</p>
-      {sugg && <div className="cz-sugg start" role="group" aria-label="Suggested questions">
-        {sugg.map((t, i) => <button key={t} type="button" style={{ "--i": i }} onClick={() => onSend(t)}>{t}</button>)}
-        <button type="button" className="alt" style={{ "--i": sugg.length }} onClick={onExplore}><Shuffle size={15} aria-hidden="true" />{EXPLORE}</button>
-      </div>}
-      <p className="cz-g3">Every answer is checked against verified help pages. No fund tips or return predictions, and nothing here moves real money.</p>
-    </div>
-  );
+function useSpeech(onText, onFinal) {
+  const rec = useRef(null), [on, setOn] = useState(false), [ok, setOk] = useState(false);
+  useEffect(() => { setOk(typeof window !== "undefined" && !!(window.SpeechRecognition || window.webkitSpeechRecognition)); }, []);
+  function toggle() {
+    if (on) { rec.current && rec.current.stop(); return; }
+    const R = window.SpeechRecognition || window.webkitSpeechRecognition; if (!R) return;
+    const r = new R(); r.lang = "en-IN"; r.interimResults = true; r.maxAlternatives = 1;
+    r.onresult = (e) => { const t = [...e.results].map((x) => x[0].transcript).join(" "); onText(t); if (e.results[e.results.length - 1].isFinal) onFinal(t); };
+    r.onend = () => setOn(false); r.onerror = () => setOn(false);
+    rec.current = r; setOn(true); try { r.start(); } catch { setOn(false); }
+  }
+  return { ok, on, toggle };
 }
 
-/* The conversation: messages, contextual suggestions and an anchored composer. */
-export function Conversation({ s, v, tl, opts, chat, busy, live, sugg, onAsk, onOpen, onInspect, onExplore, onPick, ctxOpen, setCtxOpen, onDetails, showContext = true, focusKey }) {
+/* The conversation: greeting, messages, suggestions, typeahead and an anchored composer with voice input. */
+export function Conversation({ s, v, tl, opts, chat, busy, sugg, onAsk, onOpen, onInspect, onExplore, onPick, ctxOpen, setCtxOpen, onDetails, showCard = true, focusKey }) {
   const [q, setQ] = useState(""), [err, setErr] = useState(""), [acOpen, setAcOpen] = useState(false), [hi, setHi] = useState(-1);
   const logRef = useRef(null), ta = useRef(null), prevLen = useRef(chat.length);
+  const speech = useSpeech((t) => { setQ(t); setAcOpen(false); }, (t) => { const x = t.trim(); if (x && !PII.test(x)) { setQ(""); onAsk(x); } });
 
   useEffect(() => {
     const box = logRef.current; if (!box) return;
     const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
-    if (chat.length <= 1 && !busy) { box.scrollTo({ top: 0 }); prevLen.current = chat.length; return; } // a fresh conversation starts at the top
+    if (chat.length <= 1 && !busy) { box.scrollTo({ top: 0 }); prevLen.current = chat.length; return; }
     const grew = chat.length > prevLen.current; prevLen.current = chat.length;
     const last = chat[chat.length - 1];
     if (busy) { box.scrollTo({ top: box.scrollHeight, behavior: motion }); return; }
@@ -196,23 +202,23 @@ export function Conversation({ s, v, tl, opts, chat, busy, live, sugg, onAsk, on
       if (el) box.scrollTo({ top: Math.max(0, el.offsetTop - 12), behavior: motion });
     } else if (grew) box.scrollTo({ top: box.scrollHeight, behavior: motion });
   }, [chat, busy]);
-  useLayoutEffect(() => { const t = ta.current; if (!t) return; t.style.height = ""; if (!q) return; t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 132) + "px"; }, [q]);
+  useLayoutEffect(() => { const t = ta.current; if (!t) return; t.style.height = ""; if (!q) return; t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 120) + "px"; }, [q]);
   useEffect(() => { if (focusKey && ta.current) ta.current.focus({ preventScroll: true }); }, [focusKey]);
 
   function send(text) {
     if (busy) return;
     const t = (text ?? q).trim();
-    if (!t) { setErr("Type a question, or pick one of the suggestions."); return; }
+    if (!t) { setErr("Type a message, or pick a suggestion."); return; }
     if (PII.test(t)) { setErr(PII_MSG); return; }
     setErr(""); if (text === undefined) setQ(""); onAsk(t);
   }
   const pii = PII.test(q);
-  const fresh = chat.length === 1 && chat[0].role === "greet";
+  const fresh = chat.length === 0;
   const asked = chat.filter((m) => m.role === "user").map((m) => m.text);
   const ac = typeahead(s, q, asked);
   const acItems = [...ac.qs.map((t) => ({ k: "q", t })), ...ac.sits.map((x) => ({ k: "s", x }))];
   const showAc = acOpen && !busy && acItems.length > 0 && !pii;
-  function choose(it) { setAcOpen(false); setHi(-1); if (it.k === "q") { setQ(""); send(it.t); } else { setQ(""); onPick(it.x.id); } }
+  function choose(it) { setAcOpen(false); setHi(-1); setQ(""); if (it.k === "q") send(it.t); else onPick(it.x.id); }
   function onKey(e) {
     if (!acOpen && e.key === "ArrowDown" && !busy) { e.preventDefault(); setAcOpen(true); return; }
     if (showAc && (e.key === "ArrowDown" || e.key === "ArrowUp")) { e.preventDefault(); const n = acItems.length; setHi((h) => (e.key === "ArrowDown" ? (h + 1) % n : (h - 1 + n) % n)); return; }
@@ -222,59 +228,68 @@ export function Conversation({ s, v, tl, opts, chat, busy, live, sugg, onAsk, on
 
   return (
     <div className={"cz-chat" + (fresh ? " fresh" : "")}>
-      {showContext && <div className="cz-ctxbar"><ContextCard s={s} v={v} tl={tl} open={ctxOpen} onToggle={() => setCtxOpen(!ctxOpen)} onDetails={onDetails} /></div>}
       <div className="cz-log" ref={logRef} role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation with SIP Companion">
-        {chat.map((m) => {
-          if (m.role === "greet") return <div key={m.id} data-mid={m.id} className="cz-greet-wrap"><Greeting sugg={fresh && !busy ? sugg : null} onSend={send} onExplore={onExplore} /></div>;
-          if (m.role === "user") return <div key={m.id} data-mid={m.id} className={"cz-row me cz-msg" + (m.stale ? " stale" : "")}><p className="cz-bubble me">{m.text}</p></div>;
+        {fresh ? (
+          <div className="cz-hero">
+            <Orb size={showCard ? 92 : 120} state="hello" halo />
+            <h2 className="cz-hello">Hi! I'm your<br />SIP Companion</h2>
+            <p className="cz-sub">Ask me anything about your SIP in your own words: missed payments, dates, your options, or how SIPs work.</p>
+            {showCard && <SipCard s={s} v={v} tl={tl} open={ctxOpen} onToggle={() => setCtxOpen(!ctxOpen)} onDetails={onDetails} />}
+            <div className="cz-chips" role="group" aria-label="Suggested questions">
+              {sugg.map((t, i) => <button key={t} type="button" style={{ "--i": i }} onClick={() => send(t)}>{t}</button>)}
+              <button type="button" className="alt" style={{ "--i": sugg.length }} onClick={onExplore}><Shuffle size={14} aria-hidden="true" />{EXPLORE}</button>
+            </div>
+            <p className="cz-trust"><ShieldCheck size={14} aria-hidden="true" />Every reply is checked against verified help pages. No fund tips, no return predictions, no real money moves.</p>
+          </div>
+        ) : chat.map((m) => {
+          if (m.role === "user") return <div key={m.id} data-mid={m.id} className={"cz-row me cz-msg" + (m.stale ? " stale" : "")}><div className="cz-me"><p className="cz-bubble me">{m.text}</p><time className="cz-time">{clock(m.at)}</time></div></div>;
           if (m.role === "sys") return <p key={m.id} data-mid={m.id} className="cz-sys cz-msg" role="note">{m.text}</p>;
-          if (m.role === "err") return <div key={m.id} data-mid={m.id} className="cz-row bot cz-msg"><Avatar size={30} /><div className="cz-bubble bot err"><p>{m.text}</p>{m.retry && <button type="button" className="cx-btn ghost sm" onClick={() => onAsk(m.retry)}>Try again</button>}</div></div>;
+          if (m.role === "err") return <div key={m.id} data-mid={m.id} className="cz-row bot cz-msg"><Orb size={30} /><div className="cz-bubble bot err"><p>{m.text}</p>{m.retry && <button type="button" className="cx-btn ghost sm" onClick={() => onAsk(m.retry)}>Try again</button>}</div></div>;
           if (m.role === "switch") return (
-            <div key={m.id} data-mid={m.id} className="cz-row bot cz-msg"><Avatar size={30} />
-              <div className="cz-bubble bot"><p className="cz-lbl">New situation · {m.title}</p><p>{m.v.happened}</p><p>{m.v.means}</p><p className="cz-simnote">Illustrative demo data. Ask me anything about it.</p></div></div>);
+            <div key={m.id} data-mid={m.id} className="cz-row bot cz-msg"><Orb size={30} />
+              <div className="cz-ans"><div className="cz-bubble bot"><p><b>New situation: {m.title}.</b> {m.v.happened}</p><p>{m.v.means}</p><p>Ask me anything about it.</p><time className="cz-time">{clock(m.at)}</time></div></div></div>);
           if (m.role === "situations") return (
-            <div key={m.id} data-mid={m.id} className="cz-row bot cz-msg"><Avatar size={30} />
-              <div className="cz-bubble bot">
-                <p>Here are the illustrative situations I can walk you through. Picking one starts a fresh conversation about that SIP.</p>
-                <div className="cz-opts sit" role="group" aria-label="Demo situations">
+            <div key={m.id} data-mid={m.id} className="cz-row bot cz-msg"><Orb size={30} />
+              <div className="cz-ans"><div className="cz-bubble bot"><p>Here are the illustrative situations I can walk you through. Picking one starts a fresh conversation about that SIP.</p><time className="cz-time">{clock(m.at)}</time></div>
+                <div className="cz-sits" role="group" aria-label="Demo situations">
                   {SCENARIOS.map((x, i) => (
                     <button key={x.id} type="button" style={{ "--i": i }} disabled={m.stale} aria-current={x.id === m.current ? "true" : undefined} onClick={() => onPick(x.id)}>
-                      <span className="ic"><Shuffle size={16} aria-hidden="true" /></span><span className="tx"><b>{x.title}{x.id === m.current ? " · current" : ""}</b><span>{x.blurb}</span></span><ChevronRight size={16} aria-hidden="true" />
+                      <Shuffle size={16} aria-hidden="true" /><span><b>{x.title}{x.id === m.current ? " · current" : ""}</b><em>{x.blurb}</em></span>
                     </button>))}
-                </div>
-              </div></div>);
+                </div></div></div>);
           if (m.role === "event") return (
-            <div key={m.id} data-mid={m.id} className="cz-row bot cz-msg"><Avatar size={30} />
-              <div className="cz-bubble bot event"><p className="cz-done"><CircleCheck size={17} aria-hidden="true" /><b>{m.text}</b></p><p className="cz-simnote">Simulated. No money moved and no real SIP changed. Your SIP card shows the new demo status.</p>
-                {!m.stale && <OptionRows ids={opts.filter((o) => o.available).map((o) => o.id)} opts={opts} onOpen={onOpen} label="What you can do now" />}</div></div>);
-          return <div key={m.id} data-mid={m.id} className={"cz-row bot cz-msg" + (m.stale ? " stale" : "")}><Avatar size={30} /><Answer m={m} opts={opts} onOpen={onOpen} onInspect={onInspect} /></div>;
+            <div key={m.id} data-mid={m.id} className="cz-row bot cz-msg"><Orb size={30} />
+              <div className="cz-ans"><div className="cz-bubble bot event"><p className="cz-done"><CircleCheck size={17} aria-hidden="true" /><b>{m.text}</b></p><p className="cz-simnote">Simulated. No money moved and no real SIP changed.</p><time className="cz-time">{clock(m.at)}</time></div>
+                {!m.stale && <Tiles ids={opts.filter((o) => o.available).map((o) => o.id)} opts={opts} onOpen={onOpen} label="What you can do now" />}</div></div>);
+          return <div key={m.id} data-mid={m.id} className={"cz-row bot cz-msg" + (m.stale ? " stale" : "")}><Orb size={30} /><Answer m={m} opts={opts} onOpen={onOpen} onInspect={onInspect} /></div>;
         })}
-        {busy && <Typing live={live} />}
+        {busy && <Typing />}
       </div>
       <div className="cz-dock">
-        {!busy && !fresh && (
-          <div className="cz-sugg" role="group" aria-label={fresh ? "Suggested questions" : "Follow-up suggestions"} key={sugg.join("|")}>
-            {sugg.map((t, i) => <button key={t} type="button" style={{ "--i": i }} onClick={() => send(t)}>{t}</button>)}
-            <button type="button" className="alt" style={{ "--i": sugg.length }} onClick={onExplore}><Shuffle size={15} aria-hidden="true" />{EXPLORE}</button>
-          </div>
-        )}
         {showAc && (
           <div className="cz-ac" id="cz-ac" role="listbox" aria-label="Suggestions">
             {ac.qs.length > 0 && <p className="cz-ac-h" aria-hidden="true">{q.trim() ? "Questions like yours" : "Try asking"}</p>}
-            {ac.qs.map((t, i) => <div key={t} id={"cz-ac-" + i} role="option" aria-selected={hi === i} className={"cz-ac-i" + (hi === i ? " on" : "")} onMouseDown={(e) => { e.preventDefault(); choose({ k: "q", t }); }}><ArrowUp size={14} aria-hidden="true" className="r" /><span>{t}</span></div>)}
+            {ac.qs.map((t, i) => <div key={t} id={"cz-ac-" + i} role="option" aria-selected={hi === i} className={"cz-ac-i" + (hi === i ? " on" : "")} onMouseDown={(e) => { e.preventDefault(); choose({ k: "q", t }); }}><CornerDownLeft size={14} aria-hidden="true" /><span>{t}</span></div>)}
             {ac.sits.length > 0 && <p className="cz-ac-h" aria-hidden="true">Explore a situation</p>}
             {ac.sits.map((x, j) => { const i = ac.qs.length + j; return <div key={x.id} id={"cz-ac-" + i} role="option" aria-selected={hi === i} className={"cz-ac-i sit" + (hi === i ? " on" : "")} onMouseDown={(e) => { e.preventDefault(); choose({ k: "s", x }); }}><Shuffle size={14} aria-hidden="true" /><span><b>{x.title}</b><em>{x.blurb}</em></span></div>; })}
           </div>
         )}
-        <form className="cz-compose" onSubmit={(e) => { e.preventDefault(); setAcOpen(false); send(); }}>
-          <label htmlFor="cz-q" className="sr">Ask anything about your SIP</label>
-          <textarea id="cz-q" ref={ta} rows={1} maxLength={300} placeholder="Ask about your SIP…" value={q} autoComplete="off" enterKeyHint="send"
+        {!fresh && !busy && sugg.length > 0 && (
+          <div className="cz-follow" role="group" aria-label="Follow-up suggestions" key={sugg.join("|")}>
+            {sugg.map((t, i) => <button key={t} type="button" style={{ "--i": i }} onClick={() => send(t)}>{t}</button>)}
+            <button type="button" className="alt" style={{ "--i": sugg.length }} onClick={onExplore}><Shuffle size={14} aria-hidden="true" />{EXPLORE}</button>
+          </div>
+        )}
+        <form className={"cz-compose" + (speech.on ? " rec" : "")} onSubmit={(e) => { e.preventDefault(); setAcOpen(false); send(); }}>
+          {speech.ok && <button type="button" className="cz-mic" aria-pressed={speech.on} aria-label={speech.on ? "Stop voice input" : "Ask by voice"} onClick={speech.toggle} disabled={busy}><Mic size={19} aria-hidden="true" /></button>}
+          <label htmlFor="cz-q" className="sr">Type your question</label>
+          <textarea id="cz-q" ref={ta} rows={1} maxLength={300} placeholder={speech.on ? "Listening…" : "Type your question…"} value={q} autoComplete="off" enterKeyHint="send"
             role="combobox" aria-expanded={showAc} aria-controls="cz-ac" aria-autocomplete="list" aria-activedescendant={showAc && hi >= 0 ? "cz-ac-" + hi : undefined}
             aria-invalid={pii || !!err} aria-describedby="cz-q-h"
             onClick={() => setAcOpen(true)} onBlur={() => { setAcOpen(false); setHi(-1); }}
             onChange={(e) => { setQ(e.target.value); setAcOpen(true); setHi(-1); setErr(PII.test(e.target.value) ? PII_MSG : ""); }}
             onKeyDown={onKey} />
-          <button type="submit" className="cz-send" aria-label={busy ? "Preparing an answer" : "Send question"} disabled={busy || pii || !q.trim()}>{busy ? <span className="cz-spin" aria-hidden="true" /> : <ArrowUp size={20} aria-hidden="true" />}</button>
+          <button type="submit" className="cz-send" aria-label={busy ? "Preparing an answer" : "Send"} disabled={busy || pii || !q.trim()}>{busy ? <span className="cz-spin" aria-hidden="true" /> : <SendHorizontal size={19} aria-hidden="true" />}</button>
         </form>
         <p id="cz-q-h" className={"cz-hint" + (err ? " err" : "")} role="status">{err || "Information, not investment advice"}</p>
       </div>
