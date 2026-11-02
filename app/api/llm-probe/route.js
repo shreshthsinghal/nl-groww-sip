@@ -22,16 +22,17 @@ const CASES = [
   ["E1", "E", "Why does it say pending?", []]
 ];
 
-function groq(model, timeoutMs) {
+let lastErr = null;
+function groq(model, timeoutMs, opts) {
   return async (prompt) => {
     const ac = new AbortController(); const t = setTimeout(() => ac.abort(), timeoutMs);
     try {
       const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST", signal: ac.signal,
         headers: { authorization: "Bearer " + process.env.GROQ_API_KEY, "content-type": "application/json" },
-        body: JSON.stringify({ model, temperature: 0.2, max_tokens: 450, response_format: { type: "json_object" }, messages: [{ role: "user", content: prompt }] })
+        body: JSON.stringify(Object.assign({ model, temperature: 0.2, max_tokens: 700, messages: [{ role: "user", content: prompt }] }, opts.json ? { response_format: { type: "json_object" } } : {}, opts.effort ? { reasoning_effort: opts.effort, include_reasoning: false } : {}))
       });
-      if (!r.ok) { const e = new Error("http"); e.code = "http_" + r.status; throw e; }
+      if (!r.ok) { const b = await r.text().catch(() => ""); lastErr = b.slice(0, 300); const e = new Error("http"); e.code = "http_" + r.status; throw e; }
       const j = await r.json();
       const o = extractJSON(j.choices?.[0]?.message?.content || "");
       if (!o) { const e = new Error("parse"); e.code = "unparseable"; throw e; }
@@ -52,13 +53,15 @@ export async function GET(req) {
   }
   const model = u.searchParams.get("m") || "llama-3.3-70b-versatile";
   const timeoutMs = Number(u.searchParams.get("t") || 5000);
+  const opts = { json: u.searchParams.get("json") === "1", effort: u.searchParams.get("e") || null };
+  const only = Number(u.searchParams.get("n") || 12);
   const out = [];
-  for (const [id, sid, q, must] of CASES) {
+  for (const [id, sid, q, must] of CASES.slice(0, only)) {
     const t0 = Date.now();
-    const r = await answerQuestion(initState(sid), q, { generate: groq(model, timeoutMs) });
+    const r = await answerQuestion(initState(sid), q, { generate: groq(model, timeoutMs, opts) });
     const text = answerText(r.answer);
     out.push({ id, ms: Date.now() - t0, mode: r.mode, passed: r.passed, attempts: r.attempts, intent: r.answer.intent, mustOk: must.every((m) => new RegExp(m, "i").test(text)), text: text.slice(0, 400) });
   }
   const ms = out.map((x) => x.ms).sort((a, b) => a - b);
-  return Response.json({ model, timeoutMs, n: out.length, live: out.filter((x) => x.mode === "live").length, p50: ms[Math.floor(ms.length / 2)], p90: ms[Math.floor(ms.length * 0.9)], max: ms[ms.length - 1], out });
+  return Response.json({ model, opts, lastErr, timeoutMs, n: out.length, live: out.filter((x) => x.mode === "live").length, p50: ms[Math.floor(ms.length / 2)], p90: ms[Math.floor(ms.length * 0.9)], max: ms[ms.length - 1], out });
 }
