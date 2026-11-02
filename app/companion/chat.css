@@ -44,8 +44,9 @@
 .cz-app-t span{display:flex;align-items:center}
 .cz-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--info);margin-right:6px;flex:none}
 .cz-dot.live{background:var(--ok)}
-.cz-av{display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,var(--acc),#7A5CE0);color:#fff;flex:none}
-:root[data-theme="dark"] .cz-av{background:linear-gradient(135deg,#6E54D6,#4B2BA8)}
+.cz-av{display:grid;place-items:center;flex:none;line-height:0}
+.cz-av svg{display:block;width:100%;height:100%}
+:root[data-theme="dark"] .cz-av svg rect{stroke:rgba(255,255,255,.18);stroke-width:2}
 
 /* ---------- conversation ---------- */
 .cz-chat{flex:1;min-height:0;display:flex;flex-direction:column}

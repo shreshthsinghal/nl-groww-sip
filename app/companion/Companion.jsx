@@ -5,7 +5,7 @@ import { SCENARIOS, byId, initState, apply, describe, options, snapshot, timelin
 import { compose, retrieve, availableActions } from "@/lib/companion/answer.mjs";
 import { validate } from "@/lib/companion/validate.mjs";
 import { FACTS, SOURCES } from "@/lib/companion/base.mjs";
-import { Conversation, ContextCard, Avatar, MODE, starterQuestions } from "./Chat";
+import { Conversation, ContextCard, Avatar, GrowwMark, MODE, starterQuestions } from "./Chat";
 import Overview, { OptionList } from "./Overview";
 import Flow from "./Flow";
 import { sb } from "@/lib/supabase";
@@ -192,7 +192,7 @@ export default function Companion() {
 
   const webScreen = (
     <div className="cx-web cz-web">
-      <div className="cx-web-top"><b className="cx-logo"><i aria-hidden="true" />Groww-style app</b><span>Mutual funds</span><span>My SIPs</span><span aria-current="page">SIP Companion</span><span className="cx-demo-tag">Demo data</span></div>
+      <div className="cx-web-top"><b className="cx-logo"><GrowwMark size={24} />Groww-style app</b><span>Mutual funds</span><span>My SIPs</span><span aria-current="page">SIP Companion</span><span className="cx-demo-tag">Demo data</span></div>
       <div className={"cx-web-body cz-web-body" + (webSide ? "" : " solo")}>
         <section className="cz-web-chat" aria-label="SIP Companion conversation">
           <header className="cz-web-h"><Avatar size={40} /><div><b>SIP Companion</b><span><i className={"cz-dot" + (live ? " live" : "")} aria-hidden="true" />{liveTxt}</span></div>

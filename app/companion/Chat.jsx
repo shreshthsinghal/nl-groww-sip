@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ArrowUp, ChevronDown, ShieldCheck, ShieldAlert, ExternalLink, Info, Sparkles, CircleCheck, BookOpen, ChevronRight } from "lucide-react";
+import { ArrowUp, ChevronDown, ShieldCheck, ShieldAlert, ExternalLink, Info, CircleCheck, BookOpen, ChevronRight } from "lucide-react";
 import { FACTS, SOURCES } from "@/lib/companion/base.mjs";
 import { fmtShort, fmtDay, inr, ordinal, lastAttempt, consecutive } from "@/lib/companion/model.mjs";
 import { OPT_ICON, STATUS_ICON, Timeline } from "./Overview";
@@ -41,8 +41,13 @@ export function reasonLine(s) {
   return "Every instalment so far has been paid";
 }
 
+/* The original Groww-style mark used across the case study: violet tile, rising line, pink dot. Not Groww's real logo. */
+export function GrowwMark({ size = 36 }) {
+  return <svg width={size} height={size} viewBox="0 0 56 56" focusable="false"><rect width="56" height="56" rx="16" fill="#4127A0" /><polyline points="12,38 22,28 29,33 42,18" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="42" cy="18" r="5" fill="#FF7A8E" /></svg>;
+}
+
 export function Avatar({ size = 36 }) {
-  return <span className="cz-av" style={{ width: size, height: size }} aria-hidden="true"><Sparkles size={Math.round(size * 0.5)} /></span>;
+  return <span className="cz-av" style={{ width: size, height: size }} aria-hidden="true"><GrowwMark size={size} /></span>;
 }
 
 /* Compact, expandable SIP context. Friendly labels only, no internal codes. */
