@@ -3,6 +3,7 @@ import { sb } from "@/lib/supabase";
 import R from "@/lib/companion/eval_results.json";
 import { CHECKS } from "@/lib/companion/validate.mjs";
 import { SOURCES } from "@/lib/companion/base.mjs";
+import { SCENARIOS } from "@/lib/companion/model.mjs";
 
 export const revalidate = 60;
 export const metadata = { title: "How it's built · SIP Continuation", description: "The research, the Companion's grounding and answer gate, the evaluation results and their limits, and the live metrics." };
@@ -35,6 +36,25 @@ export default async function Built() {
         ))}
       </ul>
 
+      <section className="sh" id="about" style={{ gap: 14, scrollMarginTop: 80 }} aria-labelledby="ab-h">
+        <p className="eyebrow">About the prototype</p>
+        <h2 id="ab-h" className="sec">What SIP Companion does</h2>
+        <p className="note">SIP Companion is a chat assistant inside a Groww-style app for first-time mutual fund investors. It explains one SIP in plain words: its status, missed instalments, payment dates, the options available and what each option leads to. When an instalment slips, it lays out paying, changing the date, lowering the amount, skipping and stopping side by side, with no pressure towards any of them. It never recommends funds, predicts returns or tells anyone whether to invest.</p>
+        <h3 className="sec" style={{ fontSize: "1.25rem" }}>How to use it</h3>
+        <ul className="limits">
+          <li><b>Start from the greeting.</b> Pick a suggested question or type anything in your own words; the suggestions are starters, not limits. Follow-up questions continue the same conversation.</li>
+          <li><b>Check an answer.</b> Each answer carries a Checked badge and a source count. The badge opens "How this answer was generated"; the sources expand to the verified help-page text and links.</li>
+          <li><b>See the SIP.</b> The small card above the chat shows the amount, status, misses in a row and the reason (confirmed or not). "View SIP details" opens the timeline, next instalment and Pay Now window.</li>
+          <li><b>Try an option.</b> Every option is reviewed first, then confirmed or cancelled. The result is simulated: no money moves and no real SIP changes.</li>
+          <li><b>Change the situation.</b> Choose "Explore another situation" in the chat, or the compact Demo situation menu above the preview. A new situation starts a fresh conversation. App and Web previews share one conversation.</li>
+        </ul>
+        <h3 className="sec" style={{ fontSize: "1.25rem" }}>The {SCENARIOS.length} illustrative situations</h3>
+        <ul className="limits">{SCENARIOS.map((x) => <li key={x.id}><b>{x.title}.</b> {x.blurb}.</li>)}</ul>
+        <p className="note">All data is illustrative: a sample fund, a fixed demo date of 26 Oct 2026, no names, PAN or account numbers.</p>
+        <h3 className="sec" style={{ fontSize: "1.25rem" }}>Live AI or rule-based?</h3>
+        <p className="note">Live AI is switched off on this deployment. Every answer is written by the guided rule-based engine from the SIP's data and verified facts, and is labelled "Guided answer" in the chat. While it works, the chat says "Checking your SIP details…" rather than pretending to generate text. When live AI is enabled (<code>COMPANION_LIVE=1</code>), the model writes a draft and the same checks decide whether it is shown.</p>
+      </section>
+
       <section className="sh" id="evaluation" style={{ gap: 16, scrollMarginTop: 80 }} aria-labelledby="ev-h">
         <p className="eyebrow">Companion 2.0 · grounding and the answer gate</p>
         <h2 id="ev-h" className="sec">Every answer is checked before anyone sees it</h2>
@@ -49,12 +69,13 @@ export default async function Built() {
 
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>The interface: conversation first</h3>
         <ul className="limits">
-          <li><b>The Companion opens as a chat.</b> An introduction says what it is, what to ask, where its information comes from and what it won't do; a compact SIP card above it shows status, misses in a row, the confirmed or unconfirmed reason and the next instalment. The full SIP overview is a secondary tab.</li>
+          <li><b>The Companion opens as a chat.</b> A short greeting says what it helps with, offers scenario-aware starter questions and "Explore another situation", and states that answers are checked, give no fund tips or return predictions, and move no real money. A compact SIP card above it shows amount, status, misses in a row and the confirmed or unconfirmed reason; full details expand on request.</li>
           <li><b>Answers adapt to the question.</b> Short answers stay short; fuller ones are split into what we know, what it means, what you can do and what's still uncertain, with option cards and an expandable source list.</li>
           <li><b>Starter questions follow the scenario</b> (a confirmed miss, an unknown reason, a tight month, one miss, a pending debit) and go through the same engine and checks as typed questions.</li>
           <li><b>"How this answer was generated"</b> opens from each answer's Checked chip: the question, how it was produced, all {CHECKS.length} checks, the verified material used and the SIP facts available. Nothing in the browser can skip the checks; offline answers are checked on the device with the same code.</li>
           <li><b>Every option is a real, simulated flow</b>: pay the missed instalment, change the date, lower the amount, skip the next one, or stop. Each is reviewed, then confirmed or cancelled, and the result says no money moved. Stopping has no extra steps. Changing the scenario or resetting clears the conversation.</li>
-          <li><b>App and Web previews</b> render the same components as a phone app and as a desktop page with a side panel. Light and dark themes, keyboard use and reduced motion are supported.</li>
+          <li><b>App and Web previews</b> render the same components and share one conversation: a phone app, and a desktop page with the SIP and its options in a side panel. Light and dark themes, keyboard use and reduced motion are supported.</li>
+          <li><b>Honest waiting states.</b> Guided answers arrive in well under a second, so the "Checking your SIP details…" indicator is held for at least 0.45 s to stay readable. The answer is already final by then; nothing is streamed or typed out to look like live AI.</li>
         </ul>
 
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>Results from the last run</h3>
