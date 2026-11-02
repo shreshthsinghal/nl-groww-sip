@@ -1,5 +1,5 @@
 import C from "@/lib/core";
-import { callClaude, extractJSON, rateLimited, PII, MODEL, hasKey } from "@/lib/server";
+import { callClaude, extractJSON, rateLimited, PII, MODEL, liveFor } from "@/lib/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -28,7 +28,7 @@ function cleanEvent(e) {
 }
 
 export async function GET() {
-  return Response.json({ live: hasKey(), model: hasKey() ? MODEL : null });
+  return Response.json({ live: liveFor("companion"), model: liveFor("companion") ? MODEL : null });
 }
 
 export async function POST(req) {
@@ -41,6 +41,7 @@ export async function POST(req) {
     const g = C.gate(null, ev, msg);
     return Response.json({ source: "safe", reason: "pii", gate: g, out: null });
   }
+  if (!liveFor("companion")) return Response.json({ source: "safe", reason: "no_key", gate: C.gate(null, ev, msg), out: null, model: null });
   const t0 = Date.now();
   let out = null, reason = null;
   try {
@@ -49,5 +50,5 @@ export async function POST(req) {
     if (!out) reason = "unparseable";
   } catch (e) { reason = e.code || "upstream_error"; }
   const g = C.gate(out, ev, msg);
-  return Response.json({ source: out ? "live" : "safe", reason, model: hasKey() ? MODEL : null, ms: Date.now() - t0, out, gate: g });
+  return Response.json({ source: out ? "live" : "safe", reason, model: liveFor("companion") ? MODEL : null, ms: Date.now() - t0, out, gate: g });
 }

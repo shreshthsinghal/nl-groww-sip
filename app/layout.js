@@ -2,6 +2,7 @@ import "./globals.css";
 import "./companion/companion.css";
 import "./companion/app.css";
 import "./companion/cx.css";
+import "./companion/chat.css";
 import "./engine/engine.css";
 import "./research/research.css";
 import { headers } from "next/headers";

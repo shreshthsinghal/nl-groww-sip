@@ -41,11 +41,21 @@ export default async function Built() {
         <ol className="flowline">
           <li><b>Context</b><span>The illustrative SIP's status as structured data: dates, amounts, failures, reason state. No names, PAN or account numbers.</span></li>
           <li><b>Retrieve</b><span>Only the verified product facts the question needs, each tied to a Groww Help or AMFI page.</span></li>
-          <li><b>Generate</b><span>A live model when an API key is configured; otherwise a rule-based engine that composes from the same facts. Answers come as known / means / what to do / not certain.</span></li>
+          <li><b>Generate</b><span>By default a rule-based engine composes the answer from the same facts; every such answer is labelled "guided answer (rule-based, not live AI)". A live model is used only when <code>COMPANION_LIVE=1</code> is set on the server. Answers come as known / means / what to do / not certain.</span></li>
           <li><b>Validate</b><span>{CHECKS.length} deterministic checks. A model's own confidence is never counted.</span></li>
           <li><b>Retry or fall back</b><span>One retry with the failed checks named; then a checked rule-based answer, labelled as a fallback.</span></li>
         </ol>
         <details className="panel"><summary><b>The {CHECKS.length} checks</b></summary><ul className="checklist">{CHECKS.map(([k, l]) => <li key={k}><code>{k}</code> {l}</li>)}</ul></details>
+
+        <h3 className="sec" style={{ fontSize: "1.25rem" }}>The interface: conversation first</h3>
+        <ul className="limits">
+          <li><b>The Companion opens as a chat.</b> An introduction says what it is, what to ask, where its information comes from and what it won't do; a compact SIP card above it shows status, misses in a row, the confirmed or unconfirmed reason and the next instalment. The full SIP overview is a secondary tab.</li>
+          <li><b>Answers adapt to the question.</b> Short answers stay short; fuller ones are split into what we know, what it means, what you can do and what's still uncertain, with option cards and an expandable source list.</li>
+          <li><b>Starter questions follow the scenario</b> (a confirmed miss, an unknown reason, a tight month, one miss, a pending debit) and go through the same engine and checks as typed questions.</li>
+          <li><b>"How this answer was generated"</b> opens from each answer's Checked chip: the question, how it was produced, all {CHECKS.length} checks, the verified material used and the SIP facts available. Nothing in the browser can skip the checks; offline answers are checked on the device with the same code.</li>
+          <li><b>Every option is a real, simulated flow</b>: pay the missed instalment, change the date, lower the amount, skip the next one, or stop. Each is reviewed, then confirmed or cancelled, and the result says no money moved. Stopping has no extra steps. Changing the scenario or resetting clears the conversation.</li>
+          <li><b>App and Web previews</b> render the same components as a phone app and as a desktop page with a side panel. Light and dark themes, keyboard use and reduced motion are supported.</li>
+        </ul>
 
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>Results from the last run</h3>
         <p className="note">Run {when(R.ranAt)} IST with <code>npm run eval:companion</code> on the shipped code. Release bar: golden pass ≥ 85%, zero unsafe answers shown, every red-team answer blocked.</p>
@@ -73,7 +83,7 @@ export default async function Built() {
 
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>What these results don't show</h3>
         <ul className="limits">
-          <li><b>The live model hasn't been evaluated on Companion 2.0.</b> No API key is configured on this deployment, so the golden results measure the rule-based engine. The red-team tests use fake model output to prove the gate blocks it; they don't measure how often a real model would fail.</li>
+          <li><b>Live AI is switched off, and hasn't been evaluated on Companion 2.0.</b> On 1 Nov 2026 we connected free-tier models (Gemma 4 and Gemini 3.5 Flash-Lite via OpenRouter and Google AI Studio). They were rate-limited or took about 20 seconds per reply, too slow for a chat, so live generation is gated off (<code>COMPANION_LIVE</code> unset) and the golden results measure the rule-based engine. The red-team tests use fake model output to prove the gate blocks it; they don't measure how often a real model would fail.</li>
           <li><b>The golden questions were written by the same team as the engine.</b> They check behaviour we designed for; real users will phrase things differently. User tests are the next check.</li>
           <li><b>The checks are pattern-based.</b> They catch the failure modes listed above reliably, but a reworded unsafe claim could slip past. That's why a failed check never retries more than once and the fallback is always rule-based.</li>
           <li><b>Some product details are unconfirmed</b> and the Companion says so: whether a one-time investment counts as a missed instalment, whether Groww offers a pause longer than one skipped instalment, and how long an amount or date change takes to process. The Pay Now window counts weekends but not bank holidays.</li>
