@@ -14,6 +14,11 @@ const SITES = {
   }
 };
 
+// The case study's original Groww-style mark (violet tile, rising line, pink dot). Not Groww's real logo.
+function Mark() {
+  return <svg className="brand-mark" width="24" height="24" viewBox="0 0 56 56" aria-hidden="true" focusable="false"><rect width="56" height="56" rx="16" fill="#4127A0" /><polyline points="12,38 22,28 29,33 42,18" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="42" cy="18" r="5" fill="#FF7A8E" /></svg>;
+}
+
 export default function Nav({ site = "prototype" }) {
   const p = usePathname(); const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [p]);
@@ -22,7 +27,7 @@ export default function Nav({ site = "prototype" }) {
   const links = [...S.links, ...(S.more || [])];
   return (
     <header className={"topbar" + (site === "engine" ? " topbar-x" : "")}><div className="topbar-in">
-      <Link className="brand" href={S.home} aria-label={S.name + " home"}><i aria-hidden="true" />{S.name}</Link>
+      <Link className="brand" href={S.home} aria-label={S.name + " home"}><Mark />{S.name}</Link>
       {site === "engine" && <button type="button" className="menu-btn" aria-expanded={open} aria-controls="mainnav" onClick={() => setOpen(!open)}>{open ? "Close" : "Menu"}</button>}
       <nav id="mainnav" className={"nav" + (open ? " open" : "")} aria-label="Main">
         {links.map(([h, l]) => <Link key={h} href={h} aria-current={isCur(h) ? "page" : undefined} className={S.more?.some(([m]) => m === h) ? "nav-more" : undefined}>{l}</Link>)}

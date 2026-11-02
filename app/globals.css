@@ -33,7 +33,8 @@ p{margin:0}
 .topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule);padding:0 var(--gutR) 0 var(--gut)}
 .topbar-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:18px;min-height:56px;flex-wrap:wrap}
 .brand{font-weight:700;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:8px}
-.brand i{width:10px;height:10px;border-radius:50%;background:var(--c-PAY);display:inline-block}
+.brand-mark{flex:none;display:block;width:24px;height:24px}
+:root[data-theme="dark"] .brand-mark rect{stroke:rgba(255,255,255,.2);stroke-width:2}
 .nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
 .nav a{text-decoration:none;color:var(--pencil);font-weight:600;font-size:.92rem;padding:8px 12px;border-radius:999px}
 .nav a:hover{background:var(--track)}
@@ -126,7 +127,7 @@ tr:last-child td{border-bottom:none}
 
 @media (max-width:520px){
   .topbar-in{flex-wrap:nowrap;gap:10px;min-height:52px}
-  .brand{font-size:0;gap:0}.brand i{width:14px;height:14px}
+  .brand{font-size:0;gap:0}.brand-mark{width:26px;height:26px}
   .nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:0;flex:1;min-width:0}
   .nav a{font-size:.86rem;padding:7px 9px;white-space:nowrap}
 }
@@ -152,7 +153,6 @@ tr:last-child td{border-bottom:none}
 
 /* engine site: eight modules, so the menu wraps on desktop and collapses on phones */
 .topbar-x .topbar-in{max-width:1240px;gap:10px}
-.topbar-x .brand i{background:#5B3FD6;border-radius:3px}
 .topbar-x .nav{gap:2px;margin-left:auto;justify-content:flex-end}
 .topbar-x .nav a{font-size:.84rem;padding:6px 10px}
 .topbar-x .nav a.nav-more{color:var(--faint);font-weight:500}
