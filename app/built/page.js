@@ -46,13 +46,13 @@ export default async function Built() {
           <li><b>Check an answer.</b> Each answer carries a Checked badge and a source count. The badge opens "How this answer was generated"; the sources expand to the verified help-page text and links.</li>
           <li><b>See the SIP.</b> The small card above the chat shows the amount, status, misses in a row and the reason (confirmed or not). "View SIP details" opens the timeline, next instalment and Pay Now window.</li>
           <li><b>Try an option.</b> Every option is reviewed first, then confirmed or cancelled. The result is simulated: no money moves and no real SIP changes.</li>
-          <li><b>Change the situation.</b> Choose "Explore another situation" in the chat, or the compact Demo situation menu above the preview. A new situation starts a fresh conversation. App and Web previews share one conversation.</li>
+          <li><b>Change the situation.</b> Choose "Explore another situation" in the chat, or start typing: matching questions and situations appear above the message box. A new situation starts a fresh conversation. App and Web previews share one conversation.</li>
         </ul>
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>The {SCENARIOS.length} illustrative situations</h3>
         <ul className="limits">{SCENARIOS.map((x) => <li key={x.id}><b>{x.title}.</b> {x.blurb}.</li>)}</ul>
         <p className="note">All data is illustrative: a sample fund, a fixed demo date of 26 Oct 2026, no names, PAN or account numbers.</p>
-        <h3 className="sec" style={{ fontSize: "1.25rem" }}>Live AI or rule-based?</h3>
-        <p className="note">Live AI is switched off on this deployment. Every answer is written by the guided rule-based engine from the SIP's data and verified facts, and is labelled "Guided answer" in the chat. While it works, the chat says "Checking your SIP details…" rather than pretending to generate text. When live AI is enabled (<code>COMPANION_LIVE=1</code>), the model writes a draft and the same checks decide whether it is shown.</p>
+        <h3 className="sec" style={{ fontSize: "1.25rem" }}>No external AI, no API keys</h3>
+        <p className="note">The Companion does not call any outside AI service. Every answer is composed on this site by a retrieval engine: it reads the question, retrieves the SIP's facts and the verified help-page passages it needs, composes the reply and runs the {CHECKS.length} checks before showing it. While it works, the chat says "Checking your SIP details…" rather than pretending to generate text.</p>
       </section>
 
       <section className="sh" id="evaluation" style={{ gap: 16, scrollMarginTop: 80 }} aria-labelledby="ev-h">
@@ -61,7 +61,7 @@ export default async function Built() {
         <ol className="flowline">
           <li><b>Context</b><span>The illustrative SIP's status as structured data: dates, amounts, failures, reason state. No names, PAN or account numbers.</span></li>
           <li><b>Retrieve</b><span>Only the verified product facts the question needs, each tied to a Groww Help or AMFI page.</span></li>
-          <li><b>Generate</b><span>By default a rule-based engine composes the answer from the same facts; every such answer is labelled "guided answer (rule-based, not live AI)". A live model is used only when <code>COMPANION_LIVE=1</code> is set on the server. Answers come as known / means / what to do / not certain.</span></li>
+          <li><b>Compose</b><span>The on-site engine composes the answer from those facts; no outside AI service or API key is used. Answers come as what we know / what it means / what you can do / what is still uncertain, with headings only when they help.</span></li>
           <li><b>Validate</b><span>{CHECKS.length} deterministic checks. A model's own confidence is never counted.</span></li>
           <li><b>Retry or fall back</b><span>One retry with the failed checks named; then a checked rule-based answer, labelled as a fallback.</span></li>
         </ol>
@@ -75,7 +75,7 @@ export default async function Built() {
           <li><b>"How this answer was generated"</b> opens from each answer's Checked chip: the question, how it was produced, all {CHECKS.length} checks, the verified material used and the SIP facts available. Nothing in the browser can skip the checks; offline answers are checked on the device with the same code.</li>
           <li><b>Every option is a real, simulated flow</b>: pay the missed instalment, change the date, lower the amount, skip the next one, or stop. Each is reviewed, then confirmed or cancelled, and the result says no money moved. Stopping has no extra steps. Changing the scenario or resetting clears the conversation.</li>
           <li><b>App and Web previews</b> render the same components and share one conversation: a phone app, and a desktop page with the SIP and its options in a side panel. Light and dark themes, keyboard use and reduced motion are supported.</li>
-          <li><b>Honest waiting states.</b> Guided answers arrive in well under a second, so the "Checking your SIP details…" indicator is held for at least 0.45 s to stay readable. The answer is already final by then; nothing is streamed or typed out to look like live AI.</li>
+          <li><b>Honest waiting states.</b> Answers arrive in well under a second, so the "Checking your SIP details…" indicator is held for at least 0.45 s to stay readable. The answer is already final by then; nothing is streamed or typed out to look like live AI.</li>
         </ul>
 
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>Results from the last run</h3>
@@ -104,7 +104,7 @@ export default async function Built() {
 
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>What these results don't show</h3>
         <ul className="limits">
-          <li><b>Live AI is switched off, and hasn't been evaluated on Companion 2.0.</b> On 1 Nov 2026 we connected free-tier models (Gemma 4 and Gemini 3.5 Flash-Lite via OpenRouter and Google AI Studio). They were rate-limited or took about 20 seconds per reply, too slow for a chat, so live generation is gated off (<code>COMPANION_LIVE</code> unset) and the golden results measure the rule-based engine. The red-team tests use fake model output to prove the gate blocks it; they don't measure how often a real model would fail.</li>
+          <li><b>No language model is involved.</b> On 1 Nov 2026 we tried free hosted models (Gemma 4, Gemini 3.5 Flash-Lite); they were rate-limited or took about 20 seconds per reply, and the project has no budget for a paid key, so the live-AI path was removed. The golden results measure the on-site engine. The red-team tests feed fake unsafe drafts to the checks to prove they block them.</li>
           <li><b>The golden questions were written by the same team as the engine.</b> They check behaviour we designed for; real users will phrase things differently. User tests are the next check.</li>
           <li><b>The checks are pattern-based.</b> They catch the failure modes listed above reliably, but a reworded unsafe claim could slip past. That's why a failed check never retries more than once and the fallback is always rule-based.</li>
           <li><b>Some product details are unconfirmed</b> and the Companion says so: whether a one-time investment counts as a missed instalment, whether Groww offers a pause longer than one skipped instalment, and how long an amount or date change takes to process. The Pay Now window counts weekends but not bank holidays.</li>

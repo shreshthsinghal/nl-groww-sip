@@ -56,7 +56,7 @@ function Inspector({ entry, scenario, snap, live, onClose }) {
         <header><h2 id="cz-ins-t">How this answer was generated</h2><button type="button" className="cx-ib" aria-label="Close" onClick={onClose}><X size={20} aria-hidden="true" /></button></header>
         <div className="cz-drawer-b">
           <ol className="cz-pipe" aria-label="Answer pipeline">
-            {["Your question", "This SIP's demo data", "Verified help pages", live ? "Live AI writes a draft" : "Guided answer engine writes it", "15 checks", "Shown, or safe fallback"].map((t, i) => <li key={t}><span>{i + 1}</span>{t}</li>)}
+            {["Your question", "This SIP's demo data", "Verified help pages", "Answer engine composes it", "15 checks", "Shown, or safe fallback"].map((t, i) => <li key={t}><span>{i + 1}</span>{t}</li>)}
           </ol>
           {!res ? <p className="cz-muted">Ask a question and this panel shows exactly how its answer was produced and checked.</p> : (<>
             <section><h3>Question</h3><p>“{entry.q}”</p></section>
@@ -85,7 +85,7 @@ export default function Companion() {
   const [preview, setPreview] = useState("app");
   const [tab, setTab] = useState("chat");
   const [flow, setFlow] = useState(null);
-  const [live, setLive] = useState(null);
+  const live = false; // no external AI: every answer comes from the on-site retrieval engine
   const [inspect, setInspect] = useState(null); // message id or "latest"
   const [toast, setToast] = useState("");
   const [ctxOpen, setCtxOpen] = useState(false);
@@ -103,7 +103,6 @@ export default function Companion() {
     if (byId[qs]) { setSid(qs); setS(initState(qs)); }
     if (u.get("view") === "web") setPreview("web");
     if (u.get("tab") === "details") setTab("details");
-    fetch("/api/assist").then((r) => r.json()).then((j) => setLive(!!j.live), () => setLive(false));
     log("load", { moment: qs || "A" });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 3200); return () => clearTimeout(t); }, [toast]);
@@ -120,7 +119,6 @@ export default function Companion() {
     if (how === "reset") setToast("Demo reset to its starting state");
   }
   function pick(id) { restart(id, "switch"); log("scenario", { to: id, via: "chat" }); }
-  function load(id) { if (id === sid) return; restart(id, "switch"); log("scenario", { to: id, via: "toolbar" }); }
   function reset() { restart(sid, "reset"); log("reset", {}); }
   function explore() {
     if (busy) return;
@@ -176,7 +174,7 @@ export default function Companion() {
   const bots = chat.filter((m) => m.role === "bot");
   const inspected = inspect === null ? null : inspect === "latest" ? bots[bots.length - 1] : chat.find((m) => m.id === inspect);
   const layout = mobile ? "app" : preview;
-  const statusTxt = live === null ? "Connecting…" : live ? "Live AI · every answer checked" : "Guided answers · every answer checked";
+  const statusTxt = "Every answer checked";
   const toChat = () => { setTab("chat"); setFocusKey(Date.now()); };
 
   const flowEl = flow && <Flow flow={flow} s={s} view={v} setFlow={setFlow} onClose={() => setFlow(null)} onConfirm={confirm} onOpen={openFlow} onAsk={ask} onReset={reset} />;
@@ -188,7 +186,7 @@ export default function Companion() {
   const header = (cls) => (
     <header className={cls}>
       {tab === "details" ? <button type="button" className="cx-ib" aria-label="Back to the conversation" onClick={toChat}><ChevronLeft size={22} aria-hidden="true" /></button> : <Avatar size={38} alive busy={busy} />}
-      <div className="cz-id"><b>{tab === "details" ? "SIP details" : "SIP Companion"}</b><span><i className={"cz-dot" + (live ? " live" : "")} aria-hidden="true" />{tab === "details" ? "Sample fund · illustrative" : cls.includes("web") ? statusTxt : live === null ? "Connecting…" : live ? "Live AI · checked" : "Guided answers · checked"}</span></div>
+      <div className="cz-id"><b>{tab === "details" ? "SIP details" : "SIP Companion"}</b><span><i className={"cz-dot" + (live ? " live" : "")} aria-hidden="true" />{tab === "details" ? "Sample fund · illustrative" : statusTxt}</span></div>
       {cls.includes("web") && <span className="cx-demo-tag">Demo data</span>}
       <button type="button" className="cx-ib cz-hreset" aria-label="Start over" title="Start over" onClick={reset}><RotateCcw size={18} aria-hidden="true" /></button>
     </header>
@@ -219,9 +217,6 @@ export default function Companion() {
     <div className={"cx cz" + (mobile ? " is-mobile" : "")}>
       {!mobile && (
         <div className="cz-bar" role="toolbar" aria-label="Demo controls">
-          <label className="cz-scen"><span>Demo situation</span>
-            <select value={sid} onChange={(e) => load(e.target.value)}>{SCENARIOS.map((x) => <option key={x.id} value={x.id}>{x.title}</option>)}</select>
-          </label>
           <span className="cz-sp" />
           <div className="cx-seg" role="group" aria-label="Preview">
             <button type="button" aria-pressed={preview === "app"} onClick={() => setPreview("app")}><Smartphone size={16} aria-hidden="true" />App</button>

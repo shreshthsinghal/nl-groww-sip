@@ -11,7 +11,7 @@ export const EXPLORE = "Explore another situation";
 
 /* How each answer was produced, in plain words. "ok" answers passed every check. */
 export const MODE = {
-  live: ["ok", "Checked · written by live AI"], demo: ["ok", "Checked · guided answer (rule-based, not live AI)"], guard: ["ok", "Checked · answered without AI"],
+  live: ["ok", "Checked · written by live AI"], demo: ["ok", "Checked · composed from this SIP's data and verified help pages (no external AI)"], guard: ["ok", "Checked · answered without AI"],
   fallback: ["warn", "Safe fallback · the AI's draft was held back"], provider_down: ["warn", "AI unavailable · checked guided answer"],
   offline: ["warn", "Offline · checked on this device"], blocked: ["warn", "Safe reply"]
 };
@@ -29,6 +29,19 @@ export function starterQuestions(s) {
   }
   if (s.tight) return ["What if I cannot afford this month's SIP?", "Can I lower the future amount?", "Can I change the payment date?", "What happens if I pause or stop?"];
   return ["When is my next instalment?", "What happens if I want to pause?", "Can I lower the future amount?", "What does my status mean?"];
+}
+
+/* Typeahead pool: questions people ask, plus the demo situations, matched to what's being typed. */
+const EXTRA_Q = ["What does my status mean?", "When is my next instalment?", "Can I skip next month?", "How do I stop my SIP?", "Will I be charged a fee?", "Can I lower the future amount?", "Can I change my SIP date?", "What happens to what I've invested?"];
+const SIT_WORDS = { A: "two missed miss misses row failed fail insufficient balance cancel", B: "unknown reason failed fail why bank", C: "tight money afford salary short cash broke", D: "one missed miss failed first", E: "pending processing waiting debit today result" };
+const words = (t) => String(t).toLowerCase().match(/[a-z]{3,}/g) || [];
+function score(text, qw) { const tw = words(text); return qw.reduce((n, w) => n + (tw.some((x) => x.startsWith(w) || w.startsWith(x)) ? 1 : 0), 0); }
+export function typeahead(s, q, asked) {
+  const qw = words(q);
+  const pool = [...new Set(starterQuestions(s).concat(EXTRA_Q))].filter((t) => !asked.includes(t));
+  const qs = qw.length ? pool.map((t) => [t, score(t, qw)]).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).map(([t]) => t) : starterQuestions(s).filter((t) => !asked.includes(t));
+  const sits = SCENARIOS.map((x) => [x, qw.length ? score(x.title + " " + x.blurb + " " + SIT_WORDS[x.id], qw) : 1]).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).map(([x]) => x);
+  return { qs: qs.slice(0, 3), sits: sits.slice(0, qw.length ? 2 : 5) };
 }
 
 /* Plain-language reason line. Only a confirmed reason is stated as fact. */
@@ -135,7 +148,7 @@ function Answer({ m, opts, onOpen, onInspect }) {
             <BookOpen size={15} aria-hidden="true" />{srcIds.length} source{srcIds.length > 1 ? "s" : ""}<ChevronDown size={14} aria-hidden="true" className={srcOpen ? "up" : ""} />
           </button>
         )}
-        <span className="cz-mode">{res.mode === "live" ? "Live AI" : res.mode === "demo" ? "Guided answer" : res.mode === "guard" ? "Safe reply" : res.mode === "offline" ? "Offline" : "Fallback"}</span>
+        <span className="cz-mode">{res.mode === "live" ? "Live AI" : res.mode === "demo" ? "From verified sources" : res.mode === "guard" ? "Safe reply" : res.mode === "offline" ? "Offline" : "Fallback"}</span>
       </div>
       {srcIds.length > 0 && <Reveal open={srcOpen} id={"src-" + m.id}><SourceList ids={srcIds} /></Reveal>}
     </div>
@@ -168,7 +181,7 @@ function Greeting({ sugg, onSend, onExplore }) {
 
 /* The conversation: messages, contextual suggestions and an anchored composer. */
 export function Conversation({ s, v, tl, opts, chat, busy, live, sugg, onAsk, onOpen, onInspect, onExplore, onPick, ctxOpen, setCtxOpen, onDetails, showContext = true, focusKey }) {
-  const [q, setQ] = useState(""), [err, setErr] = useState("");
+  const [q, setQ] = useState(""), [err, setErr] = useState(""), [acOpen, setAcOpen] = useState(false), [hi, setHi] = useState(-1);
   const logRef = useRef(null), ta = useRef(null), prevLen = useRef(chat.length);
 
   useEffect(() => {
@@ -195,6 +208,17 @@ export function Conversation({ s, v, tl, opts, chat, busy, live, sugg, onAsk, on
   }
   const pii = PII.test(q);
   const fresh = chat.length === 1 && chat[0].role === "greet";
+  const asked = chat.filter((m) => m.role === "user").map((m) => m.text);
+  const ac = typeahead(s, q, asked);
+  const acItems = [...ac.qs.map((t) => ({ k: "q", t })), ...ac.sits.map((x) => ({ k: "s", x }))];
+  const showAc = acOpen && !busy && acItems.length > 0 && !pii;
+  function choose(it) { setAcOpen(false); setHi(-1); if (it.k === "q") { setQ(""); send(it.t); } else { setQ(""); onPick(it.x.id); } }
+  function onKey(e) {
+    if (!acOpen && e.key === "ArrowDown" && !busy) { e.preventDefault(); setAcOpen(true); return; }
+    if (showAc && (e.key === "ArrowDown" || e.key === "ArrowUp")) { e.preventDefault(); const n = acItems.length; setHi((h) => (e.key === "ArrowDown" ? (h + 1) % n : (h - 1 + n) % n)); return; }
+    if (e.key === "Escape" && showAc) { e.preventDefault(); setAcOpen(false); setHi(-1); return; }
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); if (showAc && hi >= 0) choose(acItems[hi]); else { setAcOpen(false); send(); } }
+  }
 
   return (
     <div className={"cz-chat" + (fresh ? " fresh" : "")}>
@@ -234,12 +258,22 @@ export function Conversation({ s, v, tl, opts, chat, busy, live, sugg, onAsk, on
             <button type="button" className="alt" style={{ "--i": sugg.length }} onClick={onExplore}><Shuffle size={15} aria-hidden="true" />{EXPLORE}</button>
           </div>
         )}
-        <form className="cz-compose" onSubmit={(e) => { e.preventDefault(); send(); }}>
+        {showAc && (
+          <div className="cz-ac" id="cz-ac" role="listbox" aria-label="Suggestions">
+            {ac.qs.length > 0 && <p className="cz-ac-h" aria-hidden="true">{q.trim() ? "Questions like yours" : "Try asking"}</p>}
+            {ac.qs.map((t, i) => <div key={t} id={"cz-ac-" + i} role="option" aria-selected={hi === i} className={"cz-ac-i" + (hi === i ? " on" : "")} onMouseDown={(e) => { e.preventDefault(); choose({ k: "q", t }); }}><ArrowUp size={14} aria-hidden="true" className="r" /><span>{t}</span></div>)}
+            {ac.sits.length > 0 && <p className="cz-ac-h" aria-hidden="true">Explore a situation</p>}
+            {ac.sits.map((x, j) => { const i = ac.qs.length + j; return <div key={x.id} id={"cz-ac-" + i} role="option" aria-selected={hi === i} className={"cz-ac-i sit" + (hi === i ? " on" : "")} onMouseDown={(e) => { e.preventDefault(); choose({ k: "s", x }); }}><Shuffle size={14} aria-hidden="true" /><span><b>{x.title}</b><em>{x.blurb}</em></span></div>; })}
+          </div>
+        )}
+        <form className="cz-compose" onSubmit={(e) => { e.preventDefault(); setAcOpen(false); send(); }}>
           <label htmlFor="cz-q" className="sr">Ask anything about your SIP</label>
           <textarea id="cz-q" ref={ta} rows={1} maxLength={300} placeholder="Ask about your SIP…" value={q} autoComplete="off" enterKeyHint="send"
+            role="combobox" aria-expanded={showAc} aria-controls="cz-ac" aria-autocomplete="list" aria-activedescendant={showAc && hi >= 0 ? "cz-ac-" + hi : undefined}
             aria-invalid={pii || !!err} aria-describedby="cz-q-h"
-            onChange={(e) => { setQ(e.target.value); setErr(PII.test(e.target.value) ? PII_MSG : ""); }}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
+            onClick={() => setAcOpen(true)} onBlur={() => { setAcOpen(false); setHi(-1); }}
+            onChange={(e) => { setQ(e.target.value); setAcOpen(true); setHi(-1); setErr(PII.test(e.target.value) ? PII_MSG : ""); }}
+            onKeyDown={onKey} />
           <button type="submit" className="cz-send" aria-label={busy ? "Preparing an answer" : "Send question"} disabled={busy || pii || !q.trim()}>{busy ? <span className="cz-spin" aria-hidden="true" /> : <ArrowUp size={20} aria-hidden="true" />}</button>
         </form>
         <p id="cz-q-h" className={"cz-hint" + (err ? " err" : "")} role="status">{err || "Information, not investment advice"}</p>

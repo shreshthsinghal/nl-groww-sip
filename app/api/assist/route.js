@@ -1,29 +1,12 @@
-// SIP Companion 2.0 answer route. The pipeline (lib/companion/pipeline.mjs) validates every answer before it is returned.
+// SIP Companion answer route. No external AI and no API keys: every answer is composed by the on-site
+// engine from this SIP's data and verified help-page facts, then validated (lib/companion/pipeline.mjs).
 import { cleanState, answerQuestion } from "@/lib/companion/pipeline.mjs";
-import { callClaude, extractJSON, rateLimited, MODEL, MODELS, hasKey, liveFor } from "@/lib/server";
-import * as S from "@/lib/server";
+import { rateLimited } from "@/lib/server";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
 const respond = (body, status = 200) => Response.json(body, { status, headers: { "cache-control": "no-store" } });
 
-export async function GET(req) {
-  if (new URL(req.url).searchParams.get("models") === "1" && hasKey()) {
-    if (rateLimited(req, "probe", 3)) return respond({ error: "rate_limited" }, 429);
-    return respond({ provider: S.PROVIDER, configured: MODELS, available: await S.listGeminiModels() });
-  }
-  // ?probe=1 makes one tiny model call and reports the provider's status and error message (never the key).
-  if (new URL(req.url).searchParams.get("probe") === "1" && hasKey()) {
-    if (rateLimited(req, "probe", 3)) return respond({ error: "rate_limited" }, 429);
-    const t0 = Date.now();
-    const only = new URL(req.url).searchParams.get("model");
-    const models = only && /^[A-Za-z0-9._:\/-]{3,80}$/.test(only) ? [only] : null;
-    try { const text = await callClaude("Reply with the single word OK.", { maxTokens: 5, temperature: 0, timeoutMs: 50000, models }); return respond({ ok: true, tried: models || MODELS, answeredBy: S.lastModel, reply: text.slice(0, 20), ms: Date.now() - t0 }); }
-    catch (e) { return respond({ ok: false, tried: models || MODELS, code: e.code, status: e.status || null, detail: e.detail || null, raw: e.raw || null, ms: Date.now() - t0 }); }
-  }
-  const live = liveFor("companion");
-  return respond({ live, provider: live ? S.PROVIDER : null, model: live ? MODEL : null, fallbacks: live ? MODELS.slice(1) : [] });
-}
+export async function GET() { return respond({ live: false, engine: "on-site retrieval + checks" }); }
 
 export async function POST(req) {
   if (rateLimited(req, "assist", 30)) return respond({ error: "rate_limited" }, 429);
@@ -33,9 +16,6 @@ export async function POST(req) {
   if (!q) return respond({ error: "empty" }, 400);
   if (!s) return respond({ error: "bad_state" }, 400);
   const t0 = Date.now();
-  const generate = liveFor("companion") ? async (prompt) => {
-    return extractJSON(await callClaude(prompt, { maxTokens: 600, temperature: 0.2, timeoutMs: 18000 })); // null if unparseable: fails the schema check and is retried
-  } : null;
-  const r = await answerQuestion(s, q, { generate });
-  return respond({ ...r, model: r.mode === "live" ? (S.lastModel || MODEL) : null, ms: Date.now() - t0 });
+  const r = await answerQuestion(s, q, { generate: null });
+  return respond({ ...r, ms: Date.now() - t0 });
 }
