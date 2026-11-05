@@ -144,7 +144,7 @@ export default function Companion() {
   }
 
   /* Conversation memory sent with each message: who said what, the topic, and any open offer. */
-  const historyOf = (c) => c.slice(-10).flatMap((m) => m.role === "user" ? [{ role: "user", text: m.text }] : m.role === "bot" ? [{ role: "bot", intent: m.res.answer.intent, offer: m.res.answer.offer || undefined }] : []);
+  const historyOf = (c) => c.slice(-10).flatMap((m) => m.role === "user" ? [{ role: "user", text: m.text }] : m.role === "bot" ? [{ role: "bot", intent: m.res.answer.intent, offer: m.res.answer.offer || undefined, text: [].concat(m.res.answer.known || [], m.res.answer.means || []).join(" ").slice(0, 240) }] : []);
 
   async function ask(q) {
     if (busy) return;

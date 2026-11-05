@@ -2,6 +2,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChevronDown, ShieldCheck, ShieldAlert, ExternalLink, Info, CircleCheck, BookOpen, Shuffle, Mic, SendHorizontal, CornerDownLeft } from "lucide-react";
 import { FACTS, SOURCES } from "@/lib/companion/base.mjs";
+import { SOURCE_META } from "@/lib/companion/kb.mjs";
 import { SCENARIOS, fmtShort, fmtDay, inr, ordinal, lastAttempt, consecutive } from "@/lib/companion/model.mjs";
 import { OPT_ICON, STATUS_ICON, Timeline } from "./Overview";
 
@@ -111,7 +112,8 @@ function SourceList({ ids }) {
     <ul className="cz-src-list">
       {ids.map((id) => (
         <li key={id}><p>{FACTS[id].text}</p>
-          <span>{FACTS[id].src.map((k) => <a key={k} href={SOURCES[k].url} target="_blank" rel="noopener noreferrer">{SOURCES[k].title}<ExternalLink size={12} aria-hidden="true" /></a>)}</span></li>
+          <span>{FACTS[id].src.map((k) => <a key={k} href={SOURCES[k].url} target="_blank" rel="noopener noreferrer">{SOURCES[k].title}<ExternalLink size={12} aria-hidden="true" /></a>)}</span>
+          {FACTS[id].src[0] && SOURCE_META[FACTS[id].src[0]] && <small className="cz-src-meta">{SOURCE_META[FACTS[id].src[0]].org.split(" (")[0]} · checked {fmtShort(SOURCE_META[FACTS[id].src[0]].verified)} 2026</small>}</li>
       ))}
     </ul>
   );

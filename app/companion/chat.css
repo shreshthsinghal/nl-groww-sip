@@ -304,3 +304,4 @@
   .cz *,.cz *::before,.cz *::after,.cz-scrim,.cz-drawer{animation:none!important;transition:none!important}
   .cz-typing .dots i{opacity:.6}
 }
+.cz-src-meta{display:block;margin-top:4px;font-size:.75rem;color:var(--faint)}

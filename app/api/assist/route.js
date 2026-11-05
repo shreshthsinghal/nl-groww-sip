@@ -24,8 +24,13 @@ export async function POST(req) {
   const s = cleanState(body.state);
   if (!q) return respond({ error: "empty" }, 400);
   if (!s) return respond({ error: "bad_state" }, 400);
-  const t0 = Date.now();
-  const generate = groqConfigured() ? groqGenerate(t0 + BUDGET_MS) : null;
+  const t0 = Date.now(), rid = Math.random().toString(36).slice(2, 10), meter = { calls: [] };
+  const generate = groqConfigured() ? groqGenerate(t0 + BUDGET_MS, meter) : null;
   const r = await answerQuestion(s, q, { generate, history: cleanHistory(body.history) });
-  return respond({ ...r, model: r.mode === "live" ? lastModel : undefined, liveAvailable: groqConfigured(), ms: Date.now() - t0 });
+  const ms = Date.now() - t0;
+  const usage = { in: meter.calls.reduce((a, c) => a + (c.in || 0), 0), out: meter.calls.reduce((a, c) => a + (c.out || 0), 0), calls: meter.calls.length };
+  // One structured log line per request. No question text, no answer text, no personal data.
+  console.log(JSON.stringify({ evt: "assist", rid, sid: s.sid, mode: r.mode, reason: r.reason, model: r.mode === "live" ? lastModel : null, prompt: r.promptVersion || null,
+    retrieved: r.retrieved || null, passed: r.passed, failed: (r.attempts || []).map((a) => a.error || (a.failed || []).join("+")), ms, usage, calls: meter.calls.map((c) => c.model + ":" + c.status) }));
+  return respond({ ...r, rid, model: r.mode === "live" ? lastModel : undefined, liveAvailable: groqConfigured(), ms, usage });
 }
