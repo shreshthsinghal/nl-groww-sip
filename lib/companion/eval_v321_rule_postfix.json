@@ -1,6 +1,6 @@
 {
- "when": "2026-11-05T13:56:22.791Z",
- "code": "231973d + working tree",
+ "when": "2026-11-05T13:58:14.010Z",
+ "code": "e598589 + working tree",
  "system": "rule-based + retrieval engine (no model)",
  "dataset": "v3.2",
  "dev": {
@@ -128,7 +128,7 @@
    "latencyMs": {
     "p50": 0,
     "p95": 1,
-    "max": 32
+    "max": 25
    }
   },
   "rows": [
@@ -151,7 +151,7 @@
     "intent": "LEARN",
     "schemaOk": true,
     "gate": true,
-    "ms": 32,
+    "ms": 25,
     "attempts": [],
     "fails": [],
     "text": "A SIP invests a fixed amount in a mutual fund scheme at regular intervals, such as every month, usually through an automatic debit from your bank. Each instalment buys units of the scheme at its NAV, the market value of what the scheme holds, which changes every working day. Yours is ₹3,000 on the 28th of each month. "
@@ -175,7 +175,7 @@
     "intent": "LEARN",
     "schemaOk": true,
     "gate": true,
-    "ms": 4,
+    "ms": 3,
     "attempts": [],
     "fails": [],
     "text": "A SIP invests a fixed amount in a mutual fund scheme at regular intervals, such as every month, usually through an automatic debit from your bank. Each instalment buys units of the scheme at its NAV, the market value of what the scheme holds, which changes every working day. Yours is ₹3,000 on the 28th of each month. "
@@ -367,7 +367,7 @@
     "intent": "STATUS",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "Every instalment so far has been paid. You said money is tight this month. Nothing has been missed. If you skip the 28 Oct instalment, it isn't counted as a failure. You can skip this month, lower future instalments or move the date. The app doesn't allow cancelling within 7 days of an instalment. Want me to walk you through where this SIP stands? "
@@ -391,7 +391,7 @@
     "intent": "WHY",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "The 23 Oct instalment of ₹3,000 didn't go through. The bank reported insufficient balance on the debit date. The instalment before it failed for the same reason. That's 2 in a row. A monthly SIP is cancelled automatically after 3 in a row, so the 23 Nov instalment matters. Pay Now is open until Tue, 27 Oct. You could also move the date to just after your income arrives. Want me to go through what you can do before the next instalment? "
@@ -487,7 +487,7 @@
     "intent": "WHY",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "We couldn't complete the 23 Oct instalment of ₹3,000. That's 1 missed instalment in a row. A monthly SIP is only cancelled after 3 in a row, so nothing changes yet. Check your KYC status, your autopay (mandate) status and your bank balance on 23 Oct. Groww lists 15 possible causes across KYC, payment and scheme rules. Want me to go through what you can do before the next instalment? The exact reason hasn't been confirmed yet, so I can't tell you which one applies. The exact reason hasn't been co"
@@ -511,7 +511,7 @@
     "intent": "WHY",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "We couldn't complete the 23 Oct instalment of ₹3,000. That's 1 missed instalment in a row. A monthly SIP is only cancelled after 3 in a row, so nothing changes yet. Check your KYC status, your autopay (mandate) status and your bank balance on 23 Oct. Groww lists 15 possible causes across KYC, payment and scheme rules. Want me to go through what you can do before the next instalment? The exact reason hasn't been confirmed yet, so I can't tell you which one applies. The exact reason hasn't been co"
@@ -535,7 +535,7 @@
     "intent": "WHY",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "We couldn't complete the 23 Oct instalment of ₹3,000. That's 1 missed instalment in a row. A monthly SIP is only cancelled after 3 in a row, so nothing changes yet. Check your KYC status, your autopay (mandate) status and your bank balance on 23 Oct. Groww lists 15 possible causes across KYC, payment and scheme rules. Want me to go through what you can do before the next instalment? The exact reason hasn't been confirmed yet, so I can't tell you which one applies. The exact reason hasn't been co"
@@ -607,7 +607,7 @@
     "intent": "WHY",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "The 26 Oct instalment was attempted today and is waiting for the bank's result. It hasn't failed. Nothing has been missed so far. Check back once the status updates. Whether it went through isn't known yet. Whether it went through isn't known yet."
@@ -679,7 +679,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "2 instalments in a row haven't been paid. A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. If the 23 Nov instalment also fails, this SIP would be cancelled automatically. What you've invested stays invested either way. A paid instalment ends the run of misses. Skipping an instalment isn't counted as a failure. Fund houses send an email or SMS after a failed instalment, so it's worth checking those. Shall I lay out the ways to avoid another miss? "
@@ -703,7 +703,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "2 instalments in a row haven't been paid. A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. If the 23 Nov instalment also fails, this SIP would be cancelled automatically. What you've invested stays invested either way. A paid instalment ends the run of misses. Skipping an instalment isn't counted as a failure. Fund houses send an email or SMS after a failed instalment, so it's worth checking those. Shall I lay out the ways to avoid another miss? "
@@ -751,7 +751,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 3,
     "attempts": [],
     "fails": [],
     "text": "1 instalment in a row hasn't been paid. A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. With 1 missed, nothing changes yet. What you've invested stays invested. A paid instalment ends the run of misses. Skipping an instalment isn't counted as a failure. Fund houses send an email or SMS after a failed instalment, so it's worth checking those. Shall I lay out the ways to avoid another miss? "
@@ -775,7 +775,7 @@
     "intent": "STATUS",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "We couldn't complete the 23 Oct instalment of ₹3,000. The exact reason hasn't been confirmed yet. This is 1 missed instalment in a row. A monthly SIP is only cancelled automatically after 3 in a row, so nothing changes yet. Start by checking the reason: KYC status, autopay status and your balance on the debit date are the usual places to look. Want me to walk you through where this SIP stands? The exact reason hasn't been confirmed yet. The exact reason hasn't been confirmed yet."
@@ -799,7 +799,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "2 instalments in a row haven't been paid. A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. If the 23 Nov instalment also fails, this SIP would be cancelled automatically. What you've invested stays invested either way. A paid instalment ends the run of misses. Skipping an instalment isn't counted as a failure. Fund houses send an email or SMS after a failed instalment, so it's worth checking those. Shall I lay out the ways to avoid another miss? "
@@ -847,7 +847,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "No instalments are currently missed in a row. A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. Skipping an instalment isn't counted as a failure. "
@@ -895,7 +895,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. For quarterly or longer SIPs, the limit is 2. This SIP is monthly, so the limit of 3 applies to it. Shall I lay out the ways to avoid another miss? "
@@ -919,7 +919,7 @@
     "intent": "PAY",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "Pay Now is open until Tue, 27 Oct for the 23 Oct instalment of ₹3,000. Paying it ends the run of missed instalments. Only pay if the money is comfortably there. Skipping the next instalment or lowering the amount are fine choices too. "
@@ -967,7 +967,7 @@
     "intent": "PAY",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "Pay Now is shown for failures caused by insufficient balance, and this failure's reason hasn't been confirmed. You can make a one-time investment in the fund from the dashboard instead, though some funds don't allow it. Whether a one-time investment counts as the missed instalment isn't confirmed in Groww's help pages. Whether a one-time investment counts as the missed instalment isn't confirmed in Groww's help pages."
@@ -991,7 +991,7 @@
     "intent": "PAY",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "Pay Now is open until Tue, 27 Oct for the 23 Oct instalment of ₹3,000. Paying it ends the run of missed instalments. Only pay if the money is comfortably there. Skipping the next instalment or lowering the amount are fine choices too. "
@@ -1015,7 +1015,7 @@
     "intent": "PAY",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "The 26 Oct instalment is still being processed. It hasn't failed, so there's nothing to pay separately. Check back once the status updates. Investing separately now could mean investing twice for this month. Whether it went through isn't known yet. Whether it went through isn't known yet."
@@ -1063,7 +1063,7 @@
     "intent": "PAY",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "Pay Now is open until Tue, 27 Oct for the 23 Oct instalment of ₹3,000. Paying it ends the run of missed instalments. Only pay if the money is comfortably there. Skipping the next instalment or lowering the amount are fine choices too. "
@@ -1087,7 +1087,7 @@
     "intent": "LEARN",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "Each instalment buys units of the scheme at its NAV, the market value of what the scheme holds, which changes every working day. So the same amount can buy more units when the NAV is lower and fewer when it is higher. The fund's page in the app shows its latest NAV and your units. "
@@ -1207,7 +1207,7 @@
     "intent": "NEXT_DATE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "The next instalment is ₹3,000 on Mon, 23 Nov. Instalments are on the 23rd of each month. You can change the date from Edit SIP, then Edit Amount & Date. "
@@ -1231,7 +1231,7 @@
     "intent": "CHANGE_DATE",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "Moving instalments to the 5th would make the next one Thu, 5 Nov. A date just after your income arrives can make a low balance less likely. You change it from Edit SIP, then Edit Amount & Date. Want to review moving it to the 5th? The app shows the processing time when you confirm, so a very close instalment may still use the old date. The app shows the processing time when you confirm, so a very close instalment may still use the old date."
@@ -1255,7 +1255,7 @@
     "intent": "LOWER",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "Future instalments are ₹3,000 a month now. You can change the amount from Edit SIP, then Edit Amount & Date. A new amount applies to future instalments, not to one that already failed. Want to review a lower amount? Nothing changes until you confirm. Each fund sets its own minimum, and the app shows the processing time when you confirm. Each fund sets its own minimum, and the app shows the processing time when you confirm."
@@ -1327,7 +1327,7 @@
     "intent": "CHANGE_DATE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "Instalments are on the 26th of each month; the next is Thu, 26 Nov. You can change the date from Edit SIP, then Edit Amount & Date. A date just after your income arrives can make a low balance less likely. Want to pick a new date and see when the next instalment would be? The app shows the processing time when you confirm, so a change may not apply to an instalment that is very close. The app shows the processing time when you confirm, so a change may not apply to an instalment that is very clos"
@@ -1351,7 +1351,7 @@
     "intent": "PAUSE",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "The next instalment is ₹3,000 on Wed, 28 Oct. Groww lets you skip an upcoming instalment from Edit SIP. A skipped instalment isn't counted as a failure, and instalments continue the month after. Use Skip the next instalment to see what changes before you confirm. Want to review skipping it? Nothing changes until you confirm. Groww's help pages describe skipping one instalment; I couldn't confirm a longer pause. Groww's help pages describe skipping one instalment; I couldn't confirm a longer paus"
@@ -1423,7 +1423,7 @@
     "intent": "STOP",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "You can stop this SIP from the SIPs tab. Stopping ends future instalments. What you've invested stays invested until you choose to redeem it. A cancellation can't be undone, but you can start a new SIP later. Use Stop this SIP to review it before confirming. Lowering the amount or skipping a month are also there if they suit you better. "
@@ -1495,7 +1495,7 @@
     "intent": "AFFORD",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "The next instalment is ₹3,000 on Wed, 28 Oct. You don't have to pay an instalment you can't afford. A skipped instalment isn't counted as a failure, and a lower amount applies to future instalments. You can skip the next instalment, lower future instalments, move the date. Stopping isn't possible within 7 days of an instalment. Whether an amount or date change is processed before 28 Oct depends on the processing time the app shows when you confirm. Whether an amount or date change is processed b"
@@ -1543,7 +1543,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "2 instalments in a row haven't been paid. A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. If the 23 Nov instalment also fails, this SIP would be cancelled automatically. What you've invested stays invested either way. A paid instalment ends the run of misses. Skipping an instalment isn't counted as a failure. Fund houses send an email or SMS after a failed instalment, so it's worth checking those. Shall I lay out the ways to avoid another miss? "
@@ -1591,7 +1591,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "2 instalments in a row haven't been paid. A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. If the 23 Nov instalment also fails, this SIP would be cancelled automatically. What you've invested stays invested either way. A paid instalment ends the run of misses. Skipping an instalment isn't counted as a failure. Fund houses send an email or SMS after a failed instalment, so it's worth checking those. Shall I lay out the ways to avoid another miss? "
@@ -1663,7 +1663,7 @@
     "intent": "LEARN",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "Mutual fund investments are subject to market risks. There's no assurance of returns, so the value of what's invested can go down as well as up. Early months can look flat or negative while the value moves with the market. I can't predict how it will move. SEBI's investor website explains how SIPs behave over time. I can explain this SIP's payments and options. "
@@ -1783,7 +1783,7 @@
     "intent": "PAY",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "Pay Now is open until Tue, 27 Oct for the 23 Oct instalment of ₹3,000. Paying it ends the run of missed instalments. Only pay if the money is comfortably there. Skipping the next instalment or lowering the amount are fine choices too. "
@@ -1807,7 +1807,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "Here's what I can tell you. No instalments are currently missed in a row. A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. Skipping an instalment isn't counted as a failure. "
@@ -1855,7 +1855,7 @@
     "intent": "CHANGE_DATE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "Here's how, step by step: You can change the SIP amount and date from Edit SIP, then Edit Amount & Date. The app shows an estimated processing time. You can also review it right here first; nothing changes until you confirm, and it's simulated in this demo. Want to pick a new date and see when the next instalment would be? "
@@ -1903,7 +1903,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "Here's what I can tell you. 2 instalments in a row haven't been paid. A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. If the 23 Nov instalment also fails, this SIP would be cancelled automatically. What you've invested stays invested either way. A paid instalment ends the run of misses. Skipping an instalment isn't counted as a failure. Fund houses send an email or SMS after a failed instalment, so it's worth checking those. Shall I lay out the ways to avoid an"
@@ -1927,7 +1927,7 @@
     "intent": "LOWER",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "Yes, you can lower future instalments from ₹3,000 to ₹2,000. The change applies to future instalments, so the 28 Oct instalment would be ₹2,000 if it's processed in time. It doesn't change anything already paid or missed. Want to review lowering it to ₹2,000? Nothing changes until you confirm. Each fund sets its own minimum, and the app shows the processing time when you confirm. Each fund sets its own minimum, and the app shows the processing time when you confirm."
@@ -1975,7 +1975,7 @@
     "intent": "CONSEQUENCE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "No instalments are currently missed in a row. A monthly SIP is cancelled automatically after 3 instalments in a row aren't paid. Skipping an instalment isn't counted as a failure. "
@@ -2119,7 +2119,7 @@
     "intent": "OUT_OF_SCOPE",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "That's outside what I know, I'm afraid. I stick to SIPs, and this one in particular. Ask me about your payments, dates or options, or how SIPs work. "
@@ -2191,7 +2191,7 @@
     "intent": "WHY",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "We couldn't complete the 23 Oct instalment of ₹3,000. That's 1 missed instalment in a row. A monthly SIP is only cancelled after 3 in a row, so nothing changes yet. Check your KYC status, your autopay (mandate) status and your bank balance on 23 Oct. Groww lists 15 possible causes across KYC, payment and scheme rules. Want me to go through what you can do before the next instalment? The exact reason hasn't been confirmed yet, so I can't tell you which one applies. The exact reason hasn't been co"
@@ -2239,7 +2239,7 @@
     "intent": "ADVICE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "I can't recommend funds, predict returns or tell you whether to continue. I can explain this SIP's status and the options in the app. SEBI's investor website explains how SIPs work. "
@@ -2287,7 +2287,7 @@
     "intent": "SWITCH",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "This companion can't recommend funds, predict returns or tell you whether to invest. SEBI's investor website explains how SIPs work. Cancelling stops future instalments. What you've invested stays invested until you choose to redeem it. A cancellation can't be undone, but you can start a new SIP in the same fund later. "
@@ -2335,7 +2335,7 @@
     "intent": "ADVICE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "I can't recommend funds, predict returns or tell you whether to continue. I can explain this SIP's status and the options in the app. SEBI's investor website explains how SIPs work. "
@@ -2383,7 +2383,7 @@
     "intent": "ADVICE",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "I can't recommend funds, predict returns or tell you whether to continue. I can explain this SIP's status and the options in the app. SEBI's investor website explains how SIPs work. "
@@ -2479,7 +2479,7 @@
     "intent": "OUT_OF_SCOPE",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "I can only help with this SIP's status, payments and the options in the app. Try one of the suggested questions, or see Groww Help for anything else. "
@@ -2575,7 +2575,7 @@
     "intent": "WHY",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "We couldn't complete the 23 Oct instalment of ₹3,000. That's 1 missed instalment in a row. A monthly SIP is only cancelled after 3 in a row, so nothing changes yet. Check your KYC status, your autopay (mandate) status and your bank balance on 23 Oct. Groww lists 15 possible causes across KYC, payment and scheme rules. Want me to go through what you can do before the next instalment? The exact reason hasn't been confirmed yet, so I can't tell you which one applies. The exact reason hasn't been co"
@@ -2599,7 +2599,7 @@
     "intent": "SWITCH",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "This companion can't recommend funds, predict returns or tell you whether to invest. SEBI's investor website explains how SIPs work. Cancelling stops future instalments. What you've invested stays invested until you choose to redeem it. A cancellation can't be undone, but you can start a new SIP in the same fund later. "
@@ -2647,7 +2647,7 @@
     "intent": "SWITCH",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "Whether and where to invest next is your decision; I can't compare or suggest funds. SEBI's investor website explains how SIPs work. Cancelling stops future instalments. What you've invested stays invested until you choose to redeem it. A cancellation can't be undone, but you can start a new SIP in the same fund later. "
@@ -2695,7 +2695,7 @@
     "intent": "SWITCH",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "Whether and where to invest next is your decision; I can't compare or suggest funds. SEBI's investor website explains how SIPs work. A SIP can't be cancelled when its next instalment is due within 7 days; that instalment has to be paid first. Skipping that instalment is possible. Cancelling stops future instalments. What you've invested stays invested until you choose to redeem it. "
@@ -2824,7 +2824,7 @@
    "latencyMs": {
     "p50": 0,
     "p95": 1,
-    "max": 2
+    "max": 1
    }
   },
   "rows": [
@@ -2969,7 +2969,7 @@
     "intent": "WHY",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "The 23 Oct instalment of ₹3,000 didn't go through. The bank reported insufficient balance on the debit date. The instalment before it failed for the same reason. That's 2 in a row. A monthly SIP is cancelled automatically after 3 in a row, so the 23 Nov instalment matters. Pay Now is open until Tue, 27 Oct. You could also move the date to just after your income arrives. Want me to go through what you can do before the next instalment? "
@@ -3113,7 +3113,7 @@
     "intent": "AFFORD",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "The next instalment is ₹3,000 on Wed, 28 Oct. You don't have to pay an instalment you can't afford. A skipped instalment isn't counted as a failure, and a lower amount applies to future instalments. You can skip the next instalment, lower future instalments, move the date. Stopping isn't possible within 7 days of an instalment. Whether an amount or date change is processed before 28 Oct depends on the processing time the app shows when you confirm. Whether an amount or date change is processed b"
@@ -3137,7 +3137,7 @@
     "intent": "LOWER",
     "schemaOk": true,
     "gate": true,
-    "ms": 0,
+    "ms": 1,
     "attempts": [],
     "fails": [],
     "text": "Yes, you can lower future instalments from ₹3,000 to ₹2,000. The change applies to future instalments, so the 23 Nov instalment would be ₹2,000 if it's processed in time. It doesn't change anything already paid or missed. Want to review lowering it to ₹2,000? Nothing changes until you confirm. Each fund sets its own minimum, and the app shows the processing time when you confirm. Each fund sets its own minimum, and the app shows the processing time when you confirm."
@@ -3161,7 +3161,7 @@
     "intent": "CHANGE_DATE",
     "schemaOk": true,
     "gate": true,
-    "ms": 2,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "Moving instalments to the 10th would make the next one Tue, 10 Nov. A date just after your income arrives can make a low balance less likely. You change it from Edit SIP, then Edit Amount & Date. Want to review moving it to the 10th? The app shows the processing time when you confirm, so a very close instalment may still use the old date. The app shows the processing time when you confirm, so a very close instalment may still use the old date."
@@ -3257,7 +3257,7 @@
     "intent": "LEARN",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [
      "missing:(invested|units|investments?|money (alre"
@@ -3405,7 +3405,7 @@
     "intent": "ADVICE",
     "schemaOk": true,
     "gate": true,
-    "ms": 1,
+    "ms": 0,
     "attempts": [],
     "fails": [],
     "text": "I can't recommend funds, predict returns or tell you whether to continue. I can explain this SIP's status and the options in the app. SEBI's investor website explains how SIPs work. "
