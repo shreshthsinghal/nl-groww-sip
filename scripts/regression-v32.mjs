@@ -22,6 +22,8 @@ add("R053-ok", "C", "Can I stop this SIP now?", draft("STOP", ["You can't stop t
   (r) => r.mode === "live");
 add("R053-pay", "B", "Can I pay the missed instalment?", draft("PAY", ["Pay Now is available for this instalment."]), (r) => notLive(r));
 add("R053-real", "A", "Can I stop this SIP?", draft("STOP", ["I have stopped your SIP."]), (r) => notLive(r));
+// Claim audit #32 (post-freeze): in A, stopping is allowed (next debit 28 days away); "must pay before cancelling" is wrong and pushy.
+add("R-A32", "A", "I want to cancel this SIP", draft("STOP", ["You can cancel the SIP from the app.", "You must pay the instalment due on 23 Nov before cancelling."], { sources: ["CANCEL_HOW"] }), (r) => notLive(r));
 // V038: a bare refusal or pressure to pay on an affordability question never reaches the user; the fallback lists options.
 add("R038-1", "A", "I don't have enough money, should I still pay?", draft("ADVICE", ["I can't tell you whether to pay."], { sources: ["NO_ADVICE"] }),
   (r) => notLive(r) && /skip|lower/i.test(txt(r)) && !/you (must|need to|have to) pay/i.test(txt(r)));
