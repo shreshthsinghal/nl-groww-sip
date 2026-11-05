@@ -18,5 +18,5 @@ export async function GET(req) {
     r.usage = { in: meter.calls.reduce((a, x) => a + (x.in || 0), 0), out: meter.calls.reduce((a, x) => a + (x.out || 0), 0), calls: meter.calls.map((x) => x.model.split("/")[1] + ":" + x.status) };
     rows.push(r);
   }
-  return Response.json({ from, n: rows.length, rows });
+  return Response.json({ from, n: rows.length, rows: rows.map((r) => ({ id: r.id, p: r.pass ? 1 : 0, m: r.mode[0] + (r.reason ? ":" + r.reason : ""), md: r.model ? r.model.split("/")[1].slice(0, 6) : "", ms: r.ms, s: r.srcOk, i: r.intentOk, sc: r.schemaOk ? 1 : 0, g: r.gate ? 1 : 0, u: r.usage.in + "/" + r.usage.out, at: r.attempts.join("|"), f: r.pass ? undefined : r.fails.join("; ").slice(0, 160), t: r.pass ? undefined : r.text.slice(0, 220) })) });
 }
