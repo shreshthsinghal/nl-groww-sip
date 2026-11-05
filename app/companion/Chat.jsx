@@ -150,7 +150,7 @@ function Answer({ m, opts, onOpen, onInspect }) {
         <button type="button" className={"cz-verify " + cls} onClick={() => onInspect(m.id)} aria-label={label + ". " + passed + " of " + res.checks.length + " checks passed. Open how this answer was generated."}>
           {cls === "ok" ? <ShieldCheck size={15} aria-hidden="true" /> : <ShieldAlert size={15} aria-hidden="true" />}<span>{cls === "ok" ? "Checked" : label.split(" · ")[0]}</span><span className="n">{passed}/{res.checks.length}</span>
         </button>
-        <span className={"cz-mode" + (res.mode === "live" ? " live" : "")}>{res.mode === "live" ? "Live AI" : res.mode === "provider_down" && res.reason === "rate_limited" ? "Rule-based · AI limit reached" : res.mode === "provider_down" || res.mode === "fallback" ? "Rule-based fallback" : res.mode === "demo" ? "Rule-based · verified sources" : res.mode === "guard" ? "Safety guard" : res.mode === "offline" ? "Offline" : "Safe reply"}</span>
+        <span className={"cz-mode" + (res.mode === "live" ? " live" : "")}>{res.mode === "live" ? "Live AI" : res.mode === "provider_down" && (res.reason === "rate_limited" || res.reason === "busy") ? "Rule-based · AI limit reached" : res.mode === "provider_down" ? "Rule-based · AI unavailable" : res.mode === "fallback" ? "Rule-based · AI draft didn't pass checks" : res.mode === "demo" ? "Rule-based · verified sources" : res.mode === "guard" ? "Safety guard" : res.mode === "offline" ? "Offline" : "Safe reply"}</span>
       </div>
       {srcIds.length > 0 && (
         <div className={"glass cz-srcs" + (srcOpen ? " open" : "")}>

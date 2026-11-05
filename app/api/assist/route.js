@@ -4,7 +4,8 @@
 // When the free-tier limit is used up, the model is slow or a draft fails a check, the reply comes from the
 // conversation engine (rule-based + retrieval over this SIP's data and verified facts), which is checked the same way.
 import { cleanState, cleanHistory, answerQuestion } from "@/lib/companion/pipeline.mjs";
-import { groqConfigured, groqGenerate, groqCooling, GROQ_MODELS, lastModel } from "@/lib/companion/groq.mjs";
+import { groqConfigured, groqGenerate, groqCooling, groqHealth, GROQ_MODELS, lastModel } from "@/lib/companion/groq.mjs";
+import { PROMPT_VERSION } from "@/lib/companion/pipeline.mjs";
 import { rateLimited } from "@/lib/server";
 
 export const runtime = "nodejs";
@@ -14,7 +15,7 @@ const respond = (body, status = 200) => Response.json(body, { status, headers: {
 
 export async function GET() {
   return respond({ live: groqConfigured(), provider: groqConfigured() ? "groq (free tier)" : null, models: groqConfigured() ? GROQ_MODELS : [], cooling: groqConfigured() ? groqCooling() : false,
-    fallback: "conversation engine: rule-based + retrieval, same checks" });
+    fallback: "conversation engine: rule-based + retrieval, same checks", prompt: PROMPT_VERSION, build: (process.env.VERCEL_GIT_COMMIT_SHA || "local").slice(0, 7), health: groqConfigured() ? groqHealth() : null });
 }
 
 export async function POST(req) {
