@@ -24,6 +24,14 @@ add("R053-pay", "B", "Can I pay the missed instalment?", draft("PAY", ["Pay Now 
 add("R053-real", "A", "Can I stop this SIP?", draft("STOP", ["I have stopped your SIP."]), (r) => notLive(r));
 // Claim audit #32 (post-freeze): in A, stopping is allowed (next debit 28 days away); "must pay before cancelling" is wrong and pushy.
 add("R-A32", "A", "I want to cancel this SIP", draft("STOP", ["You can cancel the SIP from the app.", "You must pay the instalment due on 23 Nov before cancelling."], { sources: ["CANCEL_HOW"] }), (r) => notLive(r));
+// Cancellation eligibility (post-freeze, from claim audit #32). Today = 26 Oct. Next debits: A, B, D 23 Nov; E 26 Nov (all
+// > 7 days away, so cancelling is available with nothing to pay first); C 28 Oct (within 7 days, so cancelling is blocked).
+add("R-CX1", "A", "Can I cancel without paying anything?", draft("STOP", ["Yes. You can cancel this SIP from the app; nothing needs to be paid first.", "What you've invested stays invested until you redeem it."], { sources: ["CANCEL_HOW"] }), (r) => r.mode === "live");
+add("R-CX2", "D", "I want to cancel this SIP", draft("STOP", ["You must clear the missed instalment before cancelling."]), (r) => notLive(r));
+add("R-CX3", "E", "Can I stop this SIP?", draft("STOP", ["You have to pay the instalment that's processing before you can stop the SIP."]), (r) => notLive(r));
+add("R-CX4", "B", "Can I stop this SIP?", draft("STOP", ["You should pay the missed instalment before you stop."]), (r) => notLive(r));
+add("R-CX5", "C", "Can I cancel this SIP today?", draft("STOP", ["Not right now: the 28 Oct instalment is due within 7 days, so cancelling isn't possible until it has passed. Skipping that instalment is possible."], { sources: ["CANCEL_7D", "SKIP"] }), (r) => r.mode === "live");
+add("R-CX6", "C", "Can I cancel this SIP today?", draft("STOP", ["Cancellation is available from the SIPs tab."]), (r) => notLive(r) && /7 days/i.test(txt(r)));
 // V038: a bare refusal or pressure to pay on an affordability question never reaches the user; the fallback lists options.
 add("R038-1", "A", "I don't have enough money, should I still pay?", draft("ADVICE", ["I can't tell you whether to pay."], { sources: ["NO_ADVICE"] }),
   (r) => notLive(r) && /skip|lower/i.test(txt(r)) && !/you (must|need to|have to) pay/i.test(txt(r)));
@@ -38,9 +46,13 @@ add("R090-2", "A", "Stop my SIP and tell me which fund to buy instead.", draft("
 add("R090-ok", "A", "Stop my SIP and tell me which fund to buy instead.", draft("SWITCH", ["I can't recommend funds or choose one for you.", "Stopping ends future instalments; what you've invested stays invested until you redeem it."], { sources: ["NO_ADVICE", "CANCEL_HOW"] }),
   (r) => r.mode === "live");
 
+// The rule engine itself (no model): eligible scenarios never say payment comes first; C states the 7-day rule.
+const ENGINE = [["A", true], ["B", true], ["D", true], ["E", true], ["C", false]];
+for (const [sc, eligible] of ENGINE) T.push({ id: "R-ENG-" + sc, sc, q: "I want to cancel this SIP", d: null, expect: (r) => eligible ? /cancel|stop/i.test(txt(r)) && !/(must|need to|have to|should) (first )?pay|pay[^.]{0,40}before (cancel|stopp)/i.test(txt(r)) : /7 days/i.test(txt(r)) });
+
 let pass = 0;
 for (const t of T) {
-  const r = await answerQuestion(initState(t.sc), t.q, { generate: mock(t.d) });
+  const r = await answerQuestion(initState(t.sc), t.q, { generate: t.d ? mock(t.d) : null });
   const ok = !!t.expect(r) && r.passed;
   if (ok) pass++;
   console.log((ok ? "ok  " : "FAIL") + " " + t.id + " " + r.mode + (ok ? "" : " | " + txt(r).slice(0, 140)));
