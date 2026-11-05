@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { DS, RECORDS, RANKED, DRIVER, DRIVER_SHORT, COLOR, SRC, W, WHY_WEIGHT, rankDrivers, bootstrap, weightNudge, pct } from "@/lib/discovery/core";
 import { Head, Bars, DriverPill } from "@/components/x/ui";
+import Breakdown from "@/components/x/Breakdown";
 
 const PRESETS = [
   ["Original model", { a: 1, b: 1, c: 1, d: 1 }], ["Volume only", { a: 1, b: 0, c: 0, d: 0 }], ["Ignore exit relevance", { a: 1, b: 0, c: 1, d: 1 }],
@@ -28,6 +29,8 @@ export default function Opportunities() {
   return (
     <div className="x-page">
       <Head eyebrow="Opportunity Ranking" title="Complaint volume is not the same as opportunity">The most common lapse story is not the best product opportunity. Compare the two views, open the full calculation for any driver, then change the assumptions and see what moves.</Head>
+      <p className="x-note warn" role="note"><b>Heuristic, not impact.</b> Scores are analyst-set prioritisation values: not predicted retention gains, ROI, causal effects or statistically validated probabilities. Shares describe the coded research sample (n = 352 lapse stories), not the investor population. A top score is a product hypothesis to test.</p>
+      <Breakdown />
       {src && <p className="x-note info">Ranked within {SRC[src]} only ({base.N} lapse stories). <Link href="/opportunities">Rank all platforms</Link>{base.N < 60 ? " Small base: treat this as directional." : ""}</p>}
 
       <section className="x-card x-sec">

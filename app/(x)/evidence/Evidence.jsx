@@ -55,7 +55,8 @@ export default function Evidence() {
         </div>
       </section>
       <div className="x-row" style={{ justifyContent: "space-between" }} aria-live="polite">
-        <p><b className="x-num">{rows.length}</b> of {RECORDS.length} records{rows.length ? `, showing ${(page - 1) * PER + 1}–${Math.min(page * PER, rows.length)}` : ""}</p>
+        <div><p><b className="x-num">{rows.length}</b> of {RECORDS.length} coded records{rows.length ? `, showing ${(page - 1) * PER + 1}–${Math.min(page * PER, rows.length)}` : ""}</p>
+          <p className="x-small">Filters applied: {[q ? `search "${q}"` : null, ...Object.entries(f).filter(([k, v]) => v && k !== "sort").map(([k, v]) => `${k} = ${v}`)].filter(Boolean).join(" · ") || "none"} · Denominator: the 450 coded records. Only coded records are browsable; the 2,068 that passed the filters but weren't coded, and the 16,487 removed by the filters, were not retained.</p></div>
         {rows.length > 0 && <p className="x-small">Human-checked in this view: {rows.filter((r) => validation(r).key === "golden").length} · First-hand: {rows.filter((r) => r.firstHand).length}</p>}
       </div>
       {rows.length === 0 ? (

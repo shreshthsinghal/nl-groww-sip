@@ -9,7 +9,7 @@ const SITES = {
   prototype: { name: "SIP Companion", home: "/companion", links: [["/companion", "Prototype"], ["/built", "How it's built"]], built: ["/built", "/lab", "/eval", "/metrics", "/design"] },
   engine: {
     name: "SIP Discovery Engine", home: "/", built: [],
-    links: [["/", "Overview"], ["/evidence", "Evidence Explorer"], ["/themes", "Insight Analysis"], ["/opportunities", "Opportunity Ranking"], ["/segments", "Segment Explorer"], ["/agent", "AI Research Agent"], ["/quality", "AI Quality"], ["/methodology", "Methodology"]],
+    links: [["/", "Overview"], ["/evidence", "Evidence Explorer"], ["/themes", "Insight Analysis"], ["/opportunities", "Opportunity Ranking"], ["/segments", "Segment Explorer"], ["/agent", "Research Assistant"], ["/quality", "AI Quality"], ["/methodology", "Methodology"]],
     more: [["/check", "Investor check"], ["/research", "Earlier research view"], ["/design", "Design"]]
   }
 };

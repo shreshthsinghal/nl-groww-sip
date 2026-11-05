@@ -31,6 +31,7 @@
 .x-note{border-left:3px solid var(--amber);background:var(--amber-soft);padding:10px 12px;border-radius:0 8px 8px 0;font-size:.9rem;color:var(--ink)}
 .x-note.info{border-color:var(--acc);background:var(--acc-soft)}
 .x-note.bad{border-color:var(--coral);background:var(--coral-soft)}
+.x-note.warn{border-color:var(--amber,#9a5b00);background:var(--amber-soft,#fcf0d8)}
 .x-note.ok{border-color:var(--teal);background:var(--teal-soft)}
 .x-pill{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--panel-2);color:var(--ink-2);border:1px solid var(--line);white-space:nowrap}
 .x-pill i{width:8px;height:8px;border-radius:50%;display:inline-block}

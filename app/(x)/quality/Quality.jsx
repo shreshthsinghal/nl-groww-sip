@@ -31,6 +31,21 @@ export default function Quality() {
   return (
     <div className="x-page">
       <Head eyebrow="AI Quality and Human Validation" title="How far to trust the AI labels">Sixty records were labelled blind by a human across three rounds of 20 and compared with the AI. Agreement improved as the codebook was revised, to moderate. Twenty items per round can show direction; they can't establish high confidence.</Head>
+      <section className="x-card x-sec" aria-labelledby="qsum-h">
+        <h2 id="qsum-h" className="x-h2">Agreement by round</h2>
+        <div className="x-tablewrap"><table className="x-table"><thead><tr><th>Round</th><th>Codebook</th><th className="n">n</th><th className="n">Raw agreement</th><th className="n">Cohen's κ</th><th>Reading</th></tr></thead><tbody>
+          {DS.rounds.map((r) => <tr key={r.round}><td>{r.round}</td><td>{r.codebook}</td><td className="n">{r.n}</td><td className="n">{r.agree}/{r.n} ({Math.round(100 * r.agree / r.n)}%)</td><td className="n">{r.kappa.toFixed(2)}</td><td>{r.kappa < 0.2 ? "slight" : r.kappa < 0.4 ? "fair" : r.kappa < 0.6 ? "moderate" : "substantial"}</td></tr>)}
+        </tbody></table></div>
+        <div className="x-tablewrap"><table className="x-table"><thead><tr><th>Label type</th><th className="n">Records</th></tr></thead><tbody>
+          <tr><td>AI-labelled (all coded records)</td><td className="n">450</td></tr>
+          <tr><td>Human-checked (blind golden rounds)</td><td className="n">{GOLDEN.length}</td></tr>
+          <tr><td>Human-checked with disagreement</td><td className="n">{GOLDEN.filter((g) => !g.agree).length}</td></tr>
+          <tr><td>Disagreements reconciled (rounds 1–2, one reviewer)</td><td className="n">{DS.reconciliation.disagreements}</td></tr>
+          <tr><td>Independently adjudicated by a second person</td><td className="n">0</td></tr>
+          <tr><td>Used to develop the codebook (rounds 1–2 led to v1.1 and v1.2)</td><td className="n">40</td></tr>
+        </tbody></table></div>
+        <p className="x-note warn" role="note"><b>Limits.</b> κ {DS.rounds[2].kappa.toFixed(2)} on the latest round is moderate, not high, and rests on 20 records. The {GOLDEN.length} checked records do not validate all 450 labels, and the measured agreement does not establish population-level classification accuracy. Rounds 1 and 2 were used to revise the codebook, so only round 3 is an out-of-sample check.</p>
+      </section>
       <section className="x-grid x-g4">
         <Kpi value={`${R3.agree} / ${R3.n}`} label="Matched, round 3 (v1.2)" def={`${R3.n - R3.agree} disagreements · ${Math.round((R3.agree / R3.n) * 100)}% agreement · n = ${R3.n}`} />
         <Kpi value={`κ ${R3.kappa.toFixed(2)}`} label={`Cohen's kappa, n = ${R3.n}`} def="Moderate. Corrects for chance agreement across 10 labels." />

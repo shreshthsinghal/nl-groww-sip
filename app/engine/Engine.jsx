@@ -54,7 +54,7 @@ export default function Engine() {
     <div className="eg">
       <section className="eg-ask" aria-labelledby="eg-h">
         <h1 id="eg-h">What's going on with your SIP?</h1>
-        <p className="eg-sub">Describe it in your own words. We'll match it with 450 first-hand stories from investors and show you what's worth knowing.</p>
+        <p className="eg-sub">Describe it in your own words. We'll look for similar investor experiences among 450 coded public posts, show the patterns they reveal, and point you to verified information. This is educational information, not personalised investment advice.</p>
         <form onSubmit={submit} className="eg-form">
           <label htmlFor="eg-t" className="sr">Describe your situation</label>
           <textarea id="eg-t" rows={3} maxLength={400} placeholder={PLACEHOLDER} value={text} aria-describedby="eg-w"
@@ -68,7 +68,7 @@ export default function Engine() {
         <div className="eg-starts" role="group" aria-label="Or start from one of these">
           {STARTERS.map(([p, l]) => <button key={p} type="button" onClick={() => { setText(""); choose(p, l, p === "STOP"); }}>{l}</button>)}
         </div>
-        <p className="eg-priv">Nothing you type is stored. Don't include account numbers or your PAN.</p>
+        <p className="eg-priv">What you type isn't saved by this site. We record anonymous usage events (that you asked, the message length, the matched situation and taps) with a random ID kept in your browser, and our host keeps standard request logs. Live AI is off, so no AI provider receives your text. Don't include your PAN, OTP or account numbers.</p>
       </section>
 
       {res && (
@@ -85,7 +85,7 @@ export default function Engine() {
           {res.pattern === "DONE" && (
             <div className="eg-block">
               <h2 className="eg-name">Then stopping is a straightforward choice</h2>
-              <ul className="eg-facts">{STOP_FACTS.slice(0, 1).map(([f, s]) => <li key={f}>{f}{s && <a href={s[1]} target="_blank" rel="noopener">{s[0]}</a>}</li>)}</ul>
+              <ul className="eg-facts">{STOP_FACTS.slice(0, 1).map(([f, s]) => <li key={f}>{f}{s ? <a href={s[1]} target="_blank" rel="noopener">{s[0]}</a> : <span className="eg-fine"> General explanation, not an official source.</span>}</li>)}</ul>
               <p className="eg-lead">You stop a SIP from the SIP's page in your app. Nothing else needs to happen.</p>
             </div>
           )}
@@ -102,8 +102,8 @@ export default function Engine() {
               <p className="eg-k">This sounds like</p>
               <h2 className="eg-name">{P.name}</h2>
               <p className="eg-lead">{P.lead}</p>
-              <figure className="eg-chart" aria-label={`${COUNTS[res.pattern]} of ${TOTAL} first-hand stories describe this`}>
-                <figcaption><b>{COUNTS[res.pattern]} of {TOTAL}</b> first-hand stories describe this.</figcaption>
+              <figure className="eg-chart" aria-label={`${COUNTS[res.pattern]} of ${TOTAL} lapse stories in the coded sample describe this`}>
+                <figcaption><b>{COUNTS[res.pattern]} of {TOTAL}</b> lapse stories in our coded sample of public posts describe this. A sample count, not how common it is among investors.</figcaption>
                 <ul>{ORDER.map((k) => (
                   <li key={k} className={k === res.pattern ? "on" : ""}><span>{PATTERNS[k].short}</span><i style={{ "--w": (COUNTS[k] / 64) * 100 + "%" }} /><em>{COUNTS[k]}</em></li>
                 ))}</ul>
@@ -112,7 +112,8 @@ export default function Engine() {
 
             {res.stories && res.stories.length > 0 && (
               <div className="eg-block">
-                <h3 className="eg-h3">People in the same spot</h3>
+                <h3 className="eg-h3">What similar investors reported</h3>
+                <p className="eg-fine">Public posts, quoted as written. One person's experience, not verified and not Groww policy.</p>
                 <div className="eg-quotes">{res.stories.map((s) => (
                   <blockquote key={s.id}><p>{s.excerpt}</p><cite>{SOURCE[s.src]}, {s.date.slice(0, 4)}</cite></blockquote>
                 ))}</div>
@@ -120,14 +121,19 @@ export default function Engine() {
             )}
 
             <div className="eg-block">
-              <h3 className="eg-h3">Worth knowing</h3>
+              <h3 className="eg-h3">What official sources say</h3>
               <ul className="eg-facts">{(res.stopping ? STOP_FACTS.concat(P.facts) : P.facts).map(([f, s]) => (
-                <li key={f}>{f}{s && <a href={s[1]} target="_blank" rel="noopener">{s[0]}</a>}</li>
+                <li key={f}>{f}{s ? <a href={s[1]} target="_blank" rel="noopener">{s[0]}</a> : <span className="eg-fine"> General explanation, not an official source.</span>}</li>
               ))}</ul>
             </div>
 
             <div className="eg-block">
-              <h3 className="eg-h3">What people in this spot can do</h3>
+              <h3 className="eg-h3">What we can't verify</h3>
+              <p className="eg-lead" style={{ fontSize: "1rem" }}>We can't see your account, your bank's exact reason for a failed debit, or your fund's specific rules, and the stories above may not match your situation. Check the Groww app, your bank or the linked help pages.</p>
+            </div>
+
+            <div className="eg-block">
+              <h3 className="eg-h3">What you can check next</h3>
               <ul className="eg-opts">{P.options.map(([t, d]) => <li key={t}><b>{t}</b><span>{d}</span></li>)}</ul>
               {P.companion && <a className="eg-cta" href={PROTOTYPE_URL + "/companion"} target="_blank" rel="noopener">Try this on a sample SIP in the Companion prototype</a>}
               <p className="eg-fine">These describe what exists. They're not a recommendation. For advice on your situation, speak to a SEBI-registered investment adviser.</p>

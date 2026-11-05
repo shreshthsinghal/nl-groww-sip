@@ -11,7 +11,7 @@ const GOLD = DS.rounds.reduce((s, r) => s + r.n, 0);
 const STEPS = [
   { k: "collect", n: DS.collected.total.toLocaleString("en-IN"), t: "Collected", s: "Public posts and reviews", href: "/methodology#q1", body: `${DS.collected.total.toLocaleString("en-IN")} public posts, comments and reviews from five platforms, gathered in ${DS.collected.window}. Reddit is ${DS.collected.RD.toLocaleString("en-IN")} of them (${pct(DS.collected.RD, DS.collected.total, 0)}).` },
   { k: "filter", n: DS.passed.toLocaleString("en-IN"), t: "Passed filters", s: "About a SIP and a person", href: "/methodology#q5", body: `${DS.passed.toLocaleString("en-IN")} passed keyword and relevance filters (about SIPs, about continuing, not spam). The records filtered out were not kept, so they can't be inspected.` },
-  { k: "select", n: DS.coded, t: "Coded", s: "Selection rule undocumented", href: "/methodology#q7", body: "450 were coded in full. The rule used to choose them from the 2,518 was not recorded. It was not a random or stratified sample. ID ranges show that each platform's candidate list was only partly coded." },
+  { k: "select", n: DS.coded, t: "Coded", s: "Selection rule undocumented", href: "/methodology#sampling", body: "450 were coded in full. The rule used to choose them from the 2,518 was not recorded. It was not a random or stratified sample. ID ranges show that each platform's candidate list was only partly coded." },
   { k: "code", n: "v1.2", t: "Labelled by AI", s: "Codebook, 3 versions", href: "/quality#codebook", body: `An AI coder assigned one primary driver, stage, emotion, segment signals and first-hand status to each record. Codebook v1.2 changed ${DS.overrides.length} labels from v1.1, each with a written rule.` },
   { k: "validate", n: GOLD, t: "Human-checked", s: "3 blind rounds of 20", href: "/quality", body: `${GOLD} human labels over 3 rounds of 20. In the latest round, AI and human agreed on ${R3.agree} of ${R3.n} (κ ${R3.kappa.toFixed(2)}, moderate). That is too small for strong confidence.` },
   { k: "rank", n: "8", t: "Ranked", s: "Share × exit × addressability", href: "/opportunities", body: `The 8 lapse drivers are ranked by story share (of ${LAPSE_N}) × exit relevance × addressability × evidence quality. The weights are analyst judgements, and you can change them.` }
@@ -29,8 +29,9 @@ export default function Overview() {
   return (
     <div className="x-page">
       <Head eyebrow="SIP Discovery Engine 2.0 · Groww case study" title="Why first SIPs lapse, and how to check our reasoning">
-        450 public stories from first-time mutual fund investors, coded into eight lapse drivers and ranked by how much a product change could help. Every number links back to the records behind it, and every judgement can be challenged.
+        450 coded public records about first-time mutual fund investors (409 identified as first-hand investor accounts), coded into eight lapse drivers and ranked by how much a product change could help. Every number links back to the records behind it, and every judgement can be challenged.
       </Head>
+      <p className="x-note warn" role="note"><b>What these numbers are.</b> This dataset is designed to identify and prioritise reported lapse mechanisms. It is not a representative estimate of SIP lapse prevalence among all investors. Driver shares describe the coded research sample, not the overall investor population. Reddit supplies 62% of everything collected; platform mix and self-selection shape the themes. <a href="/methodology#sampling">Sampling and selection</a></p>
 
       <section className="x-grid x-g4" aria-label="Key numbers">
         <Kpi value={DS.collected.total.toLocaleString("en-IN")} label="Public posts collected" def={`Five platforms, ${DS.collected.window}. Denominator for the collection stage only.`} />
