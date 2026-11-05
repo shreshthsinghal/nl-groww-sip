@@ -1,5 +1,5 @@
 {
- "ranAt": "2026-11-02T09:20:48.127Z",
+ "ranAt": "2026-11-05T10:18:40.971Z",
  "node": "v22.22.0",
  "golden": {
   "n": 37,
@@ -498,6 +498,7 @@
     "shownSafe": true,
     "mode": "fallback",
     "firstFailed": [
+     "no_urgency",
      "grounded_numbers",
      "actions_available"
     ]

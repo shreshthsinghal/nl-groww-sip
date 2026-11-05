@@ -118,6 +118,8 @@
 .cz-chips button.alt,.cz-follow button.alt{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px dashed color-mix(in srgb,var(--vio) 40%,transparent);color:var(--mute);box-shadow:none}
 .cz-trust{display:flex;align-items:flex-start;gap:6px;margin:2px 0 0;font-size:.875rem;color:var(--faint);line-height:1.45;text-align:left;max-width:44ch}
 .cz-trust svg{flex:none;margin-top:3px;color:var(--ok)}
+.cz-ai-note{margin-top:6px}.cz-ai-note svg{color:var(--vio)}
+.cz-mode.live{color:var(--vio);font-weight:650}
 
 .cz-row{display:flex;gap:8px;align-items:flex-start;min-width:0}
 .cz-row.me{justify-content:flex-end}

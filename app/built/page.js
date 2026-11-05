@@ -51,15 +51,16 @@ export default async function Built() {
         <h3 className="sec" style={{ fontSize: "1.25rem" }}>The {SCENARIOS.length} illustrative situations</h3>
         <ul className="limits">{SCENARIOS.map((x) => <li key={x.id}><b>{x.title}.</b> {x.blurb}.</li>)}</ul>
         <p className="note">All data is illustrative: a sample fund, a fixed demo date of 26 Oct 2026, no names, PAN or account numbers.</p>
-        <h3 className="sec" style={{ fontSize: "1.25rem" }}>How it holds a conversation without an AI service</h3>
-        <p className="note">The Companion doesn't call any outside AI service and needs no API key. A conversation engine on this site handles each message in four steps:</p>
+        <h3 className="sec" style={{ fontSize: "1.25rem" }}>Live AI, with a rule-based engine behind it</h3>
+        <p className="note"><b>Live AI (since 5 Nov 2026).</b> Questions about the SIP are drafted by a Groq-hosted model (Qwen 3.8 27B first, GPT-OSS 20B second) on Groq's <b>free tier</b>. The key stays on the server. Each draft gets at most 5 seconds and must pass the same {CHECKS.length} checks. <b>Free-tier disclaimer:</b> the free tier allows only a few answers a minute. When that limit is used up, the model is slow, or a draft fails a check, the reply comes from the rule-based and retrieval engine below, and the answer says so ("Rule-based · AI limit reached"). Greetings, thanks and "yes/no" to the Companion's own offers always use the engine, because they depend on the conversation's memory.</p>
+        <p className="note">The rule-based and retrieval engine runs on this site and needs no API key. It handles each message in four steps:</p>
         <ul className="limits">
           <li><b>Understand.</b> It reads your message and the last ten turns. It recognises greetings, thanks and how you're feeling, a "yes" or "no" to its own last question, follow-ups like "why?", "how?" or "what about next month?", and amounts or dates you type ("₹1,500", "1.5k", "the 5th").</li>
           <li><b>Retrieve.</b> It pulls this SIP's data and the verified facts the reply needs: Groww Help pages for product rules, plus AMFI and SEBI material for SIP basics such as NAV, withdrawals, exit loads and lock-ins.</li>
           <li><b>Compose.</b> It writes the reply from those facts, with varied wording, a next step it offers ("Want to review lowering it to ₹1,500?") and follow-up suggestions. Saying yes opens that review already filled in.</li>
           <li><b>Check.</b> The same {CHECKS.length} checks decide whether the reply is shown. If it doesn't match a topic, the engine searches example questions; if nothing is close, it says it isn't sure and offers the nearest questions instead of guessing.</li>
         </ul>
-        <p className="note">What this is not: a large language model. Wording comes from the engine's phrasing, not from free generation, and topics outside SIPs are politely declined. While it works, the chat says "Checking your SIP details…", held for about half a second so it can be read; the reply is final before it appears.</p>
+        <p className="note">The engine itself is not a large language model: its wording comes from the engine's phrasing, not from free generation, and topics outside SIPs are politely declined. While it works, the chat says "Checking your SIP details…", held for about half a second so it can be read; the reply is final before it appears.</p>
       </section>
 
       <section className="sh" id="evaluation" style={{ gap: 16, scrollMarginTop: 80 }} aria-labelledby="ev-h">
@@ -68,7 +69,7 @@ export default async function Built() {
         <ol className="flowline">
           <li><b>Context</b><span>The illustrative SIP's status as structured data: dates, amounts, failures, reason state. No names, PAN or account numbers.</span></li>
           <li><b>Retrieve</b><span>Only the verified product facts the question needs, each tied to a Groww Help or AMFI page.</span></li>
-          <li><b>Compose</b><span>The on-site engine composes the answer from those facts; no outside AI service or API key is used. Answers come as what we know / what it means / what you can do / what is still uncertain, with headings only when they help.</span></li>
+          <li><b>Compose</b><span>A live Groq model (free tier) drafts the answer from those facts; when the free limit is reached, the on-site engine composes it instead. Answers come as what we know / what it means / what you can do / what is still uncertain, with headings only when they help.</span></li>
           <li><b>Validate</b><span>{CHECKS.length} deterministic checks. A model's own confidence is never counted.</span></li>
           <li><b>Retry or fall back</b><span>One retry with the failed checks named; then a checked rule-based answer, labelled as a fallback.</span></li>
         </ol>

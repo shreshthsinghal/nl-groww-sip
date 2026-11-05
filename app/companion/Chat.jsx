@@ -11,8 +11,8 @@ export const EXPLORE = "Explore another situation";
 
 /* How each answer was produced, in plain words. "ok" answers passed every check. */
 export const MODE = {
-  demo: ["ok", "Checked · composed from this SIP's data and verified help pages (no external AI)"], guard: ["ok", "Checked · answered by the safety guard"],
-  live: ["ok", "Checked"], fallback: ["warn", "Safe fallback"], provider_down: ["warn", "Safe fallback"],
+  demo: ["ok", "Checked · composed by the rule-based and retrieval engine from this SIP's data and verified help pages"], guard: ["ok", "Checked · answered by the safety guard"],
+  live: ["ok", "Checked · written live by AI (Groq free tier), then checked"], fallback: ["ok", "Checked · the live AI's draft failed a check, so the rule-based engine answered"], provider_down: ["ok", "Checked · live AI unavailable (free-tier limit or slow), so the rule-based engine answered"],
   offline: ["warn", "Offline · checked on this device"], blocked: ["warn", "Safe reply"]
 };
 const SHORT = { PAY_MISSED: "Pay missed instalment", ONE_TIME: "One-time investment", CHANGE_DATE: "Change date", LOWER_AMOUNT: "Lower amount", SKIP_NEXT: "Skip next", STOP: "Stop SIP" };
@@ -148,7 +148,7 @@ function Answer({ m, opts, onOpen, onInspect }) {
         <button type="button" className={"cz-verify " + cls} onClick={() => onInspect(m.id)} aria-label={label + ". " + passed + " of " + res.checks.length + " checks passed. Open how this answer was generated."}>
           {cls === "ok" ? <ShieldCheck size={15} aria-hidden="true" /> : <ShieldAlert size={15} aria-hidden="true" />}<span>{cls === "ok" ? "Checked" : label.split(" · ")[0]}</span><span className="n">{passed}/{res.checks.length}</span>
         </button>
-        <span className="cz-mode">{res.mode === "demo" ? "From verified sources" : res.mode === "guard" ? "Safety guard" : res.mode === "offline" ? "Offline" : "Safe reply"}</span>
+        <span className={"cz-mode" + (res.mode === "live" ? " live" : "")}>{res.mode === "live" ? "Live AI" : res.mode === "provider_down" && res.reason === "rate_limited" ? "Rule-based · AI limit reached" : res.mode === "provider_down" || res.mode === "fallback" ? "Rule-based fallback" : res.mode === "demo" ? "Rule-based · verified sources" : res.mode === "guard" ? "Safety guard" : res.mode === "offline" ? "Offline" : "Safe reply"}</span>
       </div>
       {srcIds.length > 0 && (
         <div className={"glass cz-srcs" + (srcOpen ? " open" : "")}>
@@ -240,6 +240,7 @@ export function Conversation({ s, v, tl, opts, chat, busy, sugg, onAsk, onOpen, 
               <button type="button" className="alt" style={{ "--i": sugg.length }} onClick={onExplore}><Shuffle size={14} aria-hidden="true" />{EXPLORE}</button>
             </div>
             <p className="cz-trust"><ShieldCheck size={14} aria-hidden="true" />Every reply is checked against verified help pages. No fund tips, no return predictions, no real money moves.</p>
+            <p className="cz-trust cz-ai-note"><Info size={14} aria-hidden="true" />Live AI runs on a free tier with a small per-minute limit. When it's used up or slow, replies come from the built-in rule-based and retrieval engine, checked the same way.</p>
           </div>
         ) : chat.map((m) => {
           if (m.role === "user") return <div key={m.id} data-mid={m.id} className={"cz-row me cz-msg" + (m.stale ? " stale" : "")}><div className="cz-me"><p className="cz-bubble me">{m.text}</p><time className="cz-time">{clock(m.at)}</time></div></div>;
@@ -291,7 +292,7 @@ export function Conversation({ s, v, tl, opts, chat, busy, sugg, onAsk, onOpen, 
             onKeyDown={onKey} />
           <button type="submit" className="cz-send" aria-label={busy ? "Preparing an answer" : "Send"} disabled={busy || pii || !q.trim()}>{busy ? <span className="cz-spin" aria-hidden="true" /> : <SendHorizontal size={19} aria-hidden="true" />}</button>
         </form>
-        <p id="cz-q-h" className={"cz-hint" + (err ? " err" : "")} role="status">{err || "Information, not investment advice"}</p>
+        <p id="cz-q-h" className={"cz-hint" + (err ? " err" : "")} role="status">{err || "Information, not investment advice · Live AI on a free tier; rule-based replies when the limit is reached"}</p>
       </div>
     </div>
   );
