@@ -218,5 +218,7 @@ body:has(.cx.cz) .brand-mark circle{display:none}
 
 .cx.cz .cx-toast{border-radius:10px;line-height:1.35;padding:10px 16px;max-width:calc(100% - 32px);text-align:center}
 
+.cx.cz:has(.cx-scrim) .cx-toast,.cx.cz:has(.cz-scrim) .cx-toast{visibility:hidden}
+
 @keyframes gwPulse{0%,100%{opacity:1}50%{opacity:.55}}
 @media (prefers-reduced-motion:reduce){.cx.cz .orb.think{animation:none}}
