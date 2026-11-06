@@ -1,0 +1,313 @@
+{
+ "label": "post-fix regression on previously evaluated cases (NOT held-out validation)",
+ "run_utc": "2026-11-06T12:06:47Z to 12:09:18Z",
+ "build": "231973d",
+ "deployment": "dpl_92HzodAqXubANhV3ofQWLQBg7HbC",
+ "prompt": "companion-live-v3.2 (2026-11-05)",
+ "method": "25 sequential GET /api/eval-holdout calls, n=1 each, gap 4000 ms, via the Vercel share-link fetch; route's bounded retry unchanged; no case stopped on quota",
+ "note": "An earlier attempt at 12:02 UTC from a browser tab lost its results when the Chrome extension disconnected; it may have run some cases server-side. Those results were never observed and are not counted.",
+ "summary": {
+  "passed": "23/25",
+  "live_answers": "18/25 (18/18 passed)",
+  "fallback_after_check_or_429": "4/25 (2/4 passed)",
+  "engine_by_routing": "3/25 (3/3 passed)",
+  "rate_limit_errors": 5,
+  "tokens_in": 35568,
+  "tokens_out": 4217,
+  "failures": [
+   "H021",
+   "H025"
+  ],
+  "frozen_run_comparison": "22/25 in the 3.2 frozen run (build 201ceaa); file eval_v32_live_partial.json unchanged"
+ },
+ "claim_concerns": {
+  "H016": "Live answer, passed all checks, but says 'The next instalment must be paid before cancellation is possible.' Next debit is 23 Nov (28 days away), so this is the claim-audit #32 error in passive voice; the PAY_PUSH pattern does not catch it.",
+  "H019": "'To pay, ensure ₹3,000 is available and use the Pay Now option' among five neutral options: mild pay-prep wording the pressure check doesn't flag."
+ },
+ "texts": {
+  "H016": "Your next instalment is due on 23 Nov. You can cancel the SIP from the app. Cancelling stops future payments. Money already invested stays invested until you redeem it. The next instalment must be paid before cancellation is possible. You can choose to pay, skip, or lower the amount for that date.",
+  "H021": "No instalment is waiting to be paid. The next instalment is ₹3,000 on Wed, 28 Oct.",
+  "H025": "I didn't quite catch what you meant. I can help with this SIP's payments, dates and options, and with SIP basics. Try asking in a different way, or pick a question below."
+ },
+ "rows": [
+  {
+   "id": "H001",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 819,
+   "tokensIn": 1382,
+   "tokensOut": 152,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H002",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 561,
+   "tokensIn": 1349,
+   "tokensOut": 129,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H003",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 548,
+   "tokensIn": 1311,
+   "tokensOut": 140,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H004",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 581,
+   "tokensIn": 1380,
+   "tokensOut": 186,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H005",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 701,
+   "tokensIn": 1326,
+   "tokensOut": 159,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H006",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 688,
+   "tokensIn": 1226,
+   "tokensOut": 205,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H007",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 579,
+   "tokensIn": 1244,
+   "tokensOut": 121,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H008",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 633,
+   "tokensIn": 1275,
+   "tokensOut": 188,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H009",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 1224,
+   "tokensIn": 1231,
+   "tokensOut": 193,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H010",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 574,
+   "tokensIn": 1351,
+   "tokensOut": 143,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H011",
+   "mode": "fallback",
+   "model": "-",
+   "ms": 2333,
+   "tokensIn": 2528,
+   "tokensOut": 301,
+   "rateLimitErrors": 1,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H012",
+   "mode": "live",
+   "model": "gpt-oss-20b",
+   "ms": 1550,
+   "tokensIn": 1362,
+   "tokensOut": 308,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H013",
+   "mode": "demo",
+   "model": "-",
+   "ms": 10,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H014",
+   "mode": "demo",
+   "model": "-",
+   "ms": 1,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H015",
+   "mode": "demo",
+   "model": "-",
+   "ms": 2,
+   "tokensIn": 0,
+   "tokensOut": 0,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H016",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 1228,
+   "tokensIn": 2529,
+   "tokensOut": 370,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H017",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 605,
+   "tokensIn": 1291,
+   "tokensOut": 183,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H018",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 549,
+   "tokensIn": 1227,
+   "tokensOut": 149,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H019",
+   "mode": "live",
+   "model": "gpt-oss-20b",
+   "ms": 2251,
+   "tokensIn": 2520,
+   "tokensOut": 511,
+   "rateLimitErrors": 1,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H020",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 481,
+   "tokensIn": 1238,
+   "tokensOut": 111,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H021",
+   "mode": "fallback",
+   "model": "-",
+   "ms": 816,
+   "tokensIn": 2710,
+   "tokensOut": 207,
+   "rateLimitErrors": 1,
+   "fails": [
+    "missing:(not|n'?t) (yet )?(been )?(known|confirm"
+   ],
+   "pass": false
+  },
+  {
+   "id": "H022",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 447,
+   "tokensIn": 1132,
+   "tokensOut": 104,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H023",
+   "mode": "live",
+   "model": "qwen",
+   "ms": 443,
+   "tokensIn": 1169,
+   "tokensOut": 94,
+   "rateLimitErrors": 0,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H024",
+   "mode": "fallback",
+   "model": "-",
+   "ms": 1470,
+   "tokensIn": 2410,
+   "tokensOut": 137,
+   "rateLimitErrors": 1,
+   "fails": [],
+   "pass": true
+  },
+  {
+   "id": "H025",
+   "mode": "fallback",
+   "model": "-",
+   "ms": 1105,
+   "tokensIn": 2377,
+   "tokensOut": 126,
+   "rateLimitErrors": 1,
+   "fails": [
+    "no_decline"
+   ],
+   "pass": false
+  }
+ ]
+}
