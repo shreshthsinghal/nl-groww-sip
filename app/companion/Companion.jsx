@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RotateCcw, Smartphone, Monitor, ShieldCheck, ShieldAlert, ArrowRight, X, ScanSearch, ChevronLeft, ChevronDown, ChevronRight } from "lucide-react";
+import { RotateCcw, Smartphone, Monitor, ShieldCheck, ShieldAlert, ArrowRight, X, ScanSearch, ChevronLeft, ChevronDown, ChevronRight, Info } from "lucide-react";
 import { SCENARIOS, byId, initState, apply, describe, options, snapshot, timeline, fmtShort, fmtDay, inr, ordinal } from "@/lib/companion/model.mjs";
 import { retrieve, availableActions } from "@/lib/companion/answer.mjs";
 import { converse, entities } from "@/lib/companion/converse.mjs";
 import { validate } from "@/lib/companion/validate.mjs";
 import { FACTS, SOURCES } from "@/lib/companion/base.mjs";
-import { Conversation, SipCard, GrowwMark, MODE, EXPLORE, starterQuestions, reasonLine } from "./Chat";
+import { Conversation, SipCard, MODE, EXPLORE, starterQuestions, reasonLine } from "./Chat";
 import Overview, { OPT_ICON } from "./Overview";
 import Flow from "./Flow";
 import { sb } from "@/lib/supabase";
@@ -206,14 +206,14 @@ export default function Companion() {
     <header className={"cz-head2" + (web ? " web" : "")}>
       <span />
       <div className="cz-idc">
-        <b>{web && rail ? "Conversation" : "SIP Companion"}</b>
+        <b>{web ? "Conversation" : "SIP Companion"}</b>
         {web && rail ? <span className="cz-subl">{summary}</span> :
           <button type="button" className="cz-subl btn" aria-expanded={headOpen} aria-controls="cz-headcard" onClick={() => setHeadOpen(!headOpen)}><span className={"cz-dot t-" + v.tone} aria-hidden="true" />{summary}<ChevronDown size={14} aria-hidden="true" /></button>}
       </div>
       <button type="button" className="cx-ib cz-hreset" aria-label="Start a new conversation" title="New conversation" onClick={reset}><RotateCcw size={18} aria-hidden="true" /></button>
     </header>
   ) : (
-    <header className={"cz-head2 bare" + (web ? " web" : "")}><span /><div className="cz-idc"><b>{web && rail ? "Conversation" : "SIP Companion"}</b></div><button type="button" className="cx-ib cz-hreset" aria-label="Start a new conversation" title="New conversation" onClick={reset}><RotateCcw size={18} aria-hidden="true" /></button></header>
+    <header className={"cz-head2 bare" + (web ? " web" : "")}><span /><div className="cz-idc"><b>{web ? "Conversation" : "SIP Companion"}</b></div><button type="button" className="cx-ib cz-hreset" aria-label="Start a new conversation" title="New conversation" onClick={reset}><RotateCcw size={18} aria-hidden="true" /></button></header>
   ));
   const headCard = started && tab === "chat" && !(layout === "web" && rail) && (
     <div className={"cz-headcard" + (headOpen ? " open" : "")} id="cz-headcard" inert={!headOpen}><div><SipCard s={s} v={v} tl={tl} open={ctxOpen} onToggle={() => setCtxOpen(!ctxOpen)} onDetails={() => setTab("details")} id="cz-sip2" /></div></div>
@@ -226,12 +226,25 @@ export default function Companion() {
       {flowEl}
     </div>
   );
+  /* Independent-prototype disclosure and the reviewer controls share one compact bar. */
+  const disclosure = (
+    <span className="cz-disc"><Info size={15} aria-hidden="true" /><span className="cz-long">Independent case-study prototype · not a Groww product</span><span className="cz-short">Independent prototype · not Groww</span><span className="cx-demo-tag">Demo data</span></span>
+  );
+  const controls = (
+    <div className="cz-tools" role="toolbar" aria-label="Reviewer controls">
+      <div className="cx-seg" role="group" aria-label="Preview">
+        <button type="button" aria-pressed={preview === "app"} onClick={() => setPreview("app")}><Smartphone size={15} aria-hidden="true" />App</button>
+        <button type="button" aria-pressed={preview === "web"} onClick={() => setPreview("web")}><Monitor size={15} aria-hidden="true" />Web</button>
+      </div>
+      <button type="button" className="cx-btn ghost sm" onClick={() => setInspect("latest")} aria-label="How answers are checked" title="How answers are checked"><ScanSearch size={15} aria-hidden="true" />Checks</button>
+    </div>
+  );
   const webScreen = (
     <div className="cx-web cz-webapp">
       <nav className="cz-appnav" aria-label="Prototype">
-        <span className="cz-brand"><GrowwMark size={24} />SIP Companion</span>
-        <span className="cz-navnote">Independent case-study prototype · not a Groww product</span>
-        <span className="cx-demo-tag">Demo data</span>
+        {disclosure}
+        <span className="cz-sp" />
+        {controls}
       </nav>
       <div className={"cz-webgrid" + (rail ? " rail" : "")}>
         {rail && (
@@ -254,17 +267,7 @@ export default function Companion() {
 
   return (
     <div className={"cx cz" + (mobile ? " is-mobile" : "")}>
-      {!mobile && (
-        <div className="cz-bar" role="toolbar" aria-label="Preview controls">
-          <span className="cz-sp" />
-          <div className="cx-seg" role="group" aria-label="Preview">
-            <button type="button" aria-pressed={preview === "app"} onClick={() => setPreview("app")}><Smartphone size={16} aria-hidden="true" />App</button>
-            <button type="button" aria-pressed={preview === "web"} onClick={() => setPreview("web")}><Monitor size={16} aria-hidden="true" />Web</button>
-          </div>
-          <button type="button" className="cx-btn ghost sm" onClick={() => setInspect("latest")}><ScanSearch size={16} aria-hidden="true" /><span className="cz-l">How answers are checked</span><span className="cz-s">Checks</span></button>
-          <a className="cx-btn quiet sm cz-built" href="/built">How it's built<ArrowRight size={15} aria-hidden="true" /></a>
-        </div>
-      )}
+      {!mobile && layout === "app" && <div className="cz-bar">{disclosure}<span className="cz-sp" />{controls}</div>}
       <div className={"cz-stage " + layout + (mobile ? " mob" : "")}>
         {mobile ? appScreen : layout === "app" ? (
           <div className="cx-phone"><div className="cx-phone-scr"><div className="cx-sb" aria-hidden="true"><span>9:41</span><i className="island" /><span className="sig">5G ▮</span></div>{appScreen}</div></div>

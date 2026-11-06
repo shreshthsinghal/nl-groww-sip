@@ -200,7 +200,6 @@
   .cx.cz .cx-sum div{grid-template-columns:1fr;gap:2px}
   .cz-sip-facts{grid-template-columns:1fr 1fr}
 }
-@media (max-width:1279px){.cz-navnote{display:none}}
 
 /* fixes after first QA pass */
 .cx.cz .cz-meter i.on{background:var(--warn)}
@@ -219,6 +218,25 @@ body:has(.cx.cz) .brand-mark circle{display:none}
 .cx.cz .cx-toast{border-radius:10px;line-height:1.35;padding:10px 16px;max-width:calc(100% - 32px);text-align:center}
 
 .cx.cz:has(.cx-scrim) .cx-toast,.cx.cz:has(.cz-scrim) .cx-toast{visibility:hidden}
+
+/* final refinements (6 Nov review) */
+/* 1. toast never covers content while the mobile keyboard is open */
+.cx.cz:has(#cz-q:focus) .cx-toast{visibility:hidden}
+/* 2. one compact bar: disclosure left, reviewer controls right, visually subordinate */
+.cz-disc{display:inline-flex;align-items:center;gap:8px;min-width:0;font-size:.8125rem;color:var(--mute)}
+.cz-disc>svg{flex:none;color:var(--faint)}
+.cz-disc .cz-long,.cz-disc .cz-short{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cz-disc .cz-short{display:none}
+@media (max-width:1100px){.cz-disc .cz-long{display:none}.cz-disc .cz-short{display:inline}}
+.cz-tools{flex:none;display:flex;align-items:center;gap:8px}
+.cx.cz .cz-tools .cx-seg button{min-height:30px;font-size:.8125rem;padding:0 10px}
+.cx.cz .cz-tools .cx-btn.sm{min-height:32px;padding:0 10px;font-size:.8125rem;gap:6px}
+.cx.cz .cz-appnav{height:48px;gap:12px;background:var(--card)}
+.cx.cz .cz-bar{padding:6px 20px;background:var(--card)}
+/* 4. desktop empty state sits in the visual centre of the conversation panel */
+.cx.cz .cz-webapp .cz-chat.fresh .cz-hero{margin-block:auto;max-width:640px;margin-inline:auto;gap:16px;padding-bottom:4vh}
+.cx.cz .cz-webapp .cz-chat.fresh .cz-hello{font-size:1.375rem}
+.cx.cz .cz-webapp .cz-chat.fresh .cz-sub{font-size:1rem}
 
 @keyframes gwPulse{0%,100%{opacity:1}50%{opacity:.55}}
 @media (prefers-reduced-motion:reduce){.cx.cz .orb.think{animation:none}}
