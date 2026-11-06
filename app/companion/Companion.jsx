@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RotateCcw, Smartphone, Monitor, ShieldCheck, ShieldAlert, ArrowRight, X, ScanSearch, ChevronLeft, ChevronDown, Bell } from "lucide-react";
+import { RotateCcw, Smartphone, Monitor, ShieldCheck, ShieldAlert, ArrowRight, X, ScanSearch, ChevronLeft, ChevronDown, ChevronRight } from "lucide-react";
 import { SCENARIOS, byId, initState, apply, describe, options, snapshot, timeline, fmtShort, fmtDay, inr, ordinal } from "@/lib/companion/model.mjs";
 import { retrieve, availableActions } from "@/lib/companion/answer.mjs";
 import { converse, entities } from "@/lib/companion/converse.mjs";
 import { validate } from "@/lib/companion/validate.mjs";
 import { FACTS, SOURCES } from "@/lib/companion/base.mjs";
-import { Conversation, SipCard, Orb, GrowwMark, MODE, EXPLORE, starterQuestions, reasonLine } from "./Chat";
+import { Conversation, SipCard, GrowwMark, MODE, EXPLORE, starterQuestions, reasonLine } from "./Chat";
 import Overview, { OPT_ICON } from "./Overview";
 import Flow from "./Flow";
 import { sb } from "@/lib/supabase";
@@ -85,7 +85,7 @@ export default function Companion() {
   const [s, setS] = useState(() => initState("A"));
   const [chat, setChat] = useState(() => opening());
   const [busy, setBusy] = useState(false);
-  const [preview, setPreview] = useState("app");
+  const [preview, setPreview] = useState("web");
   const [tab, setTab] = useState("chat");
   const [flow, setFlow] = useState(null);
   const [inspect, setInspect] = useState(null); // message id or "latest"
@@ -105,6 +105,7 @@ export default function Companion() {
     const qs = (u.get("s") || "").toUpperCase();
     if (byId[qs]) { setSid(qs); setS(initState(qs)); }
     if (u.get("view") === "web") setPreview("web");
+    if (u.get("view") === "app") setPreview("app");
     log("load", { moment: qs || "A" });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 3200); return () => clearTimeout(t); }, [toast]);
@@ -187,6 +188,7 @@ export default function Companion() {
   const bots = chat.filter((m) => m.role === "bot");
   const inspected = inspect === null ? null : inspect === "latest" ? bots[bots.length - 1] : chat.find((m) => m.id === inspect);
   const layout = mobile ? "app" : preview;
+  const summary = inr(s.amount) + " SIP · " + v.label + (v.n > 0 && !s.stopped ? " · " + v.n + " of 3 missed" : "");
   const toChat = () => { setTab("chat"); setFocusKey(Date.now()); };
   const started = chat.length > 0;
 
@@ -204,15 +206,14 @@ export default function Companion() {
     <header className={"cz-head2" + (web ? " web" : "")}>
       <span />
       <div className="cz-idc">
-        <Orb size={web ? 54 : 44} state={busy ? "think" : "idle"} halo />
-        <b>SIP Companion</b>
-        {web && rail ? <span className="cz-subl">Let's review your {inr(s.amount)} SIP</span> :
-          <button type="button" className="cz-subl btn" aria-expanded={headOpen} aria-controls="cz-headcard" onClick={() => setHeadOpen(!headOpen)}>Let's review your {inr(s.amount)} SIP<ChevronDown size={14} aria-hidden="true" /></button>}
+        <b>{web && rail ? "Conversation" : "SIP Companion"}</b>
+        {web && rail ? <span className="cz-subl">{summary}</span> :
+          <button type="button" className="cz-subl btn" aria-expanded={headOpen} aria-controls="cz-headcard" onClick={() => setHeadOpen(!headOpen)}><span className={"cz-dot t-" + v.tone} aria-hidden="true" />{summary}<ChevronDown size={14} aria-hidden="true" /></button>}
       </div>
       <button type="button" className="cx-ib cz-hreset" aria-label="Start a new conversation" title="New conversation" onClick={reset}><RotateCcw size={18} aria-hidden="true" /></button>
     </header>
   ) : (
-    <header className="cz-head2 bare"><span /><span /><button type="button" className="cx-ib cz-hreset" aria-label="Start a new conversation" title="New conversation" onClick={reset}><RotateCcw size={18} aria-hidden="true" /></button></header>
+    <header className={"cz-head2 bare" + (web ? " web" : "")}><span /><div className="cz-idc"><b>{web && rail ? "Conversation" : "SIP Companion"}</b></div><button type="button" className="cx-ib cz-hreset" aria-label="Start a new conversation" title="New conversation" onClick={reset}><RotateCcw size={18} aria-hidden="true" /></button></header>
   ));
   const headCard = started && tab === "chat" && !(layout === "web" && rail) && (
     <div className={"cz-headcard" + (headOpen ? " open" : "")} id="cz-headcard" inert={!headOpen}><div><SipCard s={s} v={v} tl={tl} open={ctxOpen} onToggle={() => setCtxOpen(!ctxOpen)} onDetails={() => setTab("details")} id="cz-sip2" /></div></div>
@@ -225,33 +226,27 @@ export default function Companion() {
       {flowEl}
     </div>
   );
-  const sumRows = [["Current SIP", inr(s.amount) + " / month"], ["Fund", "Sample fund (illustrative)"], ["Next date", v.nx ? fmtDay(v.nx) : "None"], ["Missed in a row", v.n + " of 3"]];
   const webScreen = (
     <div className="cx-web cz-webapp">
-      <nav className="cz-appnav" aria-label="Demo app">
-        <span className="cz-brand"><GrowwMark size={26} />Groww-style app</span>
-        <span className="cz-navtab" aria-current="page">SIP Companion</span>
+      <nav className="cz-appnav" aria-label="Prototype">
+        <span className="cz-brand"><GrowwMark size={24} />SIP Companion</span>
+        <span className="cz-navnote">Independent case-study prototype · not a Groww product</span>
         <span className="cx-demo-tag">Demo data</span>
       </nav>
       <div className={"cz-webgrid" + (rail ? " rail" : "")}>
-        <section className="cz-webmain" aria-label="SIP Companion conversation">{head(true)}{headCard}{convo(true)}</section>
         {rail && (
-          <aside className="glass cz-panel" aria-label="Your SIP summary and options">
-            <h2>Your SIP summary &amp; options</h2>
-            <dl className="cz-sum">
-              {sumRows.slice(0, 1).map(([k, x]) => <div key={k}><dt>{k}</dt><dd>{x}</dd></div>)}
-              <div><dt>Status</dt><dd><span className={"cz-tag t-" + v.tone}>{v.label}</span></dd></div>
-              {sumRows.slice(1).map(([k, x]) => <div key={k}><dt>{k}</dt><dd>{x}</dd></div>)}
-            </dl>
-            <p className="cz-panel-r">{reasonLine(s)}</p>
-            <div className="cz-panel-acts">
-              {opts.filter((o) => o.available && o.id !== "EXPLAIN").map((o) => { const I = OPT_ICON[o.id]; return <button key={o.id} type="button" onClick={() => openFlow(o.id)} title={o.sub}>{I && <I size={17} aria-hidden="true" />}{SHORT_OPT[o.id] || o.title}</button>; })}
-            </div>
-            <p className="cz-panel-n">Each option is reviewed before anything changes. Nothing here is real.</p>
-            <button type="button" className="cz-panel-more" aria-expanded={railOpen} onClick={() => setRailOpen(!railOpen)}>{railOpen ? "Hide history" : "Show history"}<ChevronDown size={15} aria-hidden="true" /></button>
-            {railOpen && <div className="cz-panel-tl"><TimelineMini tl={tl} /></div>}
+          <aside className="cz-panel" aria-label="Your SIP and options">
+            <SipCard s={s} v={v} tl={tl} open={railOpen} onToggle={() => setRailOpen(!railOpen)} onDetails={() => setTab("details")} id="cz-sip3" />
+            <section className="cz-panel-opts" aria-labelledby="cz-opts-h">
+              <h2 id="cz-opts-h">Available options</h2>
+              <div className="cz-panel-acts">
+                {opts.filter((o) => o.available && o.id !== "EXPLAIN").map((o) => { const I = OPT_ICON[o.id]; return <button key={o.id} type="button" onClick={() => openFlow(o.id)} title={o.sub}>{I && <I size={17} aria-hidden="true" />}<span>{SHORT_OPT[o.id] || o.title}</span><ChevronRight size={16} aria-hidden="true" /></button>; })}
+              </div>
+              <p className="cz-panel-n">Each option opens a review first. Nothing changes until you confirm, and nothing here is real.</p>
+            </section>
           </aside>
         )}
+        <section className="cz-webmain" aria-label="SIP Companion conversation">{head(true)}{headCard}{convo(true)}</section>
       </div>
       {flowEl}
     </div>
@@ -271,7 +266,6 @@ export default function Companion() {
         </div>
       )}
       <div className={"cz-stage " + layout + (mobile ? " mob" : "")}>
-        <i className="cz-blob a" aria-hidden="true" /><i className="cz-blob b" aria-hidden="true" /><i className="cz-slab" aria-hidden="true" />
         {mobile ? appScreen : layout === "app" ? (
           <div className="cx-phone"><div className="cx-phone-scr"><div className="cx-sb" aria-hidden="true"><span>9:41</span><i className="island" /><span className="sig">5G ▮</span></div>{appScreen}</div></div>
         ) : webScreen}
@@ -282,6 +276,3 @@ export default function Companion() {
   );
 }
 
-function TimelineMini({ tl }) {
-  return <ol className="cz-tlmini">{tl.slice(-5).map((r, i) => <li key={i} className={"k-" + r.kind}><span>{fmtShort(r.date)}</span><b>{r.title}</b></li>)}</ol>;
-}

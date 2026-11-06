@@ -57,16 +57,16 @@ export function reasonLine(s) {
   return "Every instalment so far has been paid";
 }
 
-/* The case study's original Groww-style mark: violet tile, rising line, pink dot. Not Groww's real logo. */
+/* The prototype's own neutral mark: a plain tile with a rising line. Not Groww's logo or any Groww asset. */
 export function GrowwMark({ size = 36 }) {
-  return <svg width={size} height={size} viewBox="0 0 56 56" focusable="false" aria-hidden="true"><rect width="56" height="56" rx="16" fill="#4127A0" /><polyline points="12,38 22,28 29,33 42,18" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="42" cy="18" r="5" fill="#FF7A8E" /></svg>;
+  return <svg width={size} height={size} viewBox="0 0 56 56" focusable="false" aria-hidden="true"><rect width="56" height="56" rx="14" fill="var(--acc)" /><polyline points="13,37 23,27 30,32 43,19" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
 
-/* The companion's face: a glowing orb that breathes, blinks, and looks around while it works. */
-export function Orb({ size = 40, state = "idle", halo = false }) {
+/* The assistant's small, flat mark. It supports the conversation rather than leading it. */
+export function Orb({ size = 40, state = "idle" }) {
   return (
-    <span className={"orb " + state + (halo ? " halo" : "")} style={{ "--o": size + "px" }} aria-hidden="true">
-      <span className="orb-glow" /><span className="orb-ball"><span className="orb-face"><i /><i /><b /></span></span>
+    <span className={"orb " + state} style={{ "--o": size + "px" }} aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="58%" height="58%" focusable="false"><polyline points="4,16 9,11 12.5,13.5 19,7" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
     </span>
   );
 }
@@ -77,27 +77,29 @@ function Reveal({ open, children, id }) {
 }
 const clock = (t) => (t ? new Date(t).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" }) : "");
 
-/* Glass SIP card: amount, status, misses in a row and the reason; details expand on request. */
+/* SIP overview: amount, status, misses in a row, the reason and the next instalment are always visible; more on request. */
 export function SipCard({ s, v, tl, open, onToggle, onDetails, id = "cz-sip" }) {
   const Icon = STATUS_ICON[v.icon] || Info;
   const showMeter = !s.stopped && (v.n > 0 || (v.la && v.la.result === "failed"));
   return (
-    <section className={"glass cz-sip t-" + v.tone + (open ? " open" : "")} aria-label="Your SIP">
+    <section className={"cz-sip t-" + v.tone + (open ? " open" : "")} aria-label="Your SIP">
       <div className="cz-sip-top">
-        <div><span className="cz-sip-k">Monthly SIP of</span><b className="cz-sip-v">{inr(s.amount)}</b></div>
+        <div><span className="cz-sip-k">Monthly SIP</span><b className="cz-sip-v">{inr(s.amount)}</b><span className="cz-sip-f">Sample fund (illustrative) · {ordinal(s.day)} of each month</span></div>
         <span className="cz-tag"><Icon size={14} aria-hidden="true" />{v.label}</span>
       </div>
-      {showMeter && <span className="cz-meter" role="img" aria-label={v.n + " of 3 missed in a row. 3 in a row cancels a monthly SIP."}>{[0, 1, 2].map((i) => <i key={i} className={i < v.n ? "on" : ""} />)}<em>{v.n} of 3 missed in a row</em></span>}
       <p className="cz-sip-r">{reasonLine(s)}</p>
-      <button type="button" className="cz-sip-t" aria-expanded={open} aria-controls={id} onClick={onToggle}>{open ? "Hide details" : "View SIP details"}<ChevronDown size={16} aria-hidden="true" /></button>
+      <dl className="cz-sip-facts">
+        {showMeter && <div><dt>Missed in a row</dt><dd><span className="cz-meter" role="img" aria-label={v.n + " of 3 missed in a row. 3 in a row cancels a monthly SIP."}>{[0, 1, 2].map((i) => <i key={i} className={i < v.n ? "on" : ""} />)}<em>{v.n} of 3</em></span></dd></div>}
+        <div><dt>Next instalment</dt><dd>{v.nx ? inr(s.amount) + " · " + fmtShort(v.nx) : "None"}</dd></div>
+        {v.pnOpen && <div><dt>Pay Now open until</dt><dd>{fmtShort(v.pn)}</dd></div>}
+      </dl>
+      <button type="button" className="cz-sip-t" aria-expanded={open} aria-controls={id} onClick={onToggle}>{open ? "Hide details" : "More details and history"}<ChevronDown size={16} aria-hidden="true" /></button>
       <Reveal open={open} id={id}>
         <div className="cz-sip-more">
           <dl>
             <div><dt>Next instalment</dt><dd>{v.nx ? inr(s.amount) + " on " + fmtDay(v.nx) : "None"}</dd></div>
             <div><dt>Last attempt</dt><dd>{v.la ? fmtShort(v.la.date) + " · " + ({ paid: "Paid", failed: "Didn't go through", pending: "Waiting for the bank", late: "Paid with Pay Now" }[v.la.result] || "—") : "—"}</dd></div>
             {v.pnOpen && <div><dt>Pay Now open until</dt><dd>{fmtDay(v.pn)}</dd></div>}
-            <div><dt>Instalment day</dt><dd>{ordinal(s.day)} of each month</dd></div>
-            <div><dt>Fund</dt><dd>Sample fund (illustrative)</dd></div>
           </dl>
           <Timeline rows={tl} max={4} title="Recent activity" />
           {onDetails && <button type="button" className="cx-link" onClick={onDetails}>All SIP details and options</button>}
@@ -136,14 +138,26 @@ export function Tiles({ ids, opts, onOpen, label = "Options you can review" }) {
 function Answer({ m, opts, onOpen, onInspect }) {
   const res = m.res, a = res.answer, [cls, label] = MODE[res.mode] || MODE.blocked;
   const [srcOpen, setSrcOpen] = useState(false);
-  const paras = [].concat(a.known, a.means, a.todo).filter(Boolean);
+  const known = [].concat(a.known).filter(Boolean), means = [].concat(a.means).filter(Boolean), todo = [].concat(a.todo).filter(Boolean);
+  const unc = [].concat(a.uncertain).filter(Boolean);
+  const tiles = !m.stale && (a.actions || []).some((id) => id !== "EXPLAIN" && opts.some((o) => o.id === id));
+  /* Section labels only where they fit: an answer about this SIP with an explanation. Short or general answers stay plain. */
+  const labelled = a.intent !== "LEARN" && known.length > 0 && means.length > 0;
+  const secs = [["What happened", known], ["What this means", means], ["Available options", todo]].filter(([, x]) => x.length);
+  let n = 0;
   const passed = res.checks.filter((c) => c.ok).length;
   const srcIds = (a.sources || []).filter((id) => FACTS[id]);
   return (
     <div className="cz-ans">
-      <div className="cz-bubble bot">
-        {paras.map((p, i) => <p key={i} style={{ "--i": i }}>{p}</p>)}
-        {a.uncertain && a.uncertain.length > 0 && <p className="cz-unc" style={{ "--i": paras.length }}><Info size={15} aria-hidden="true" /><span>{a.uncertain.join(" ")}</span></p>}
+      <div className={"cz-bubble bot" + (labelled ? " secs" : "")}>
+        {secs.map(([h, ps]) => (
+          <div key={h} className="cz-sec">
+            {labelled && <h3 className="cz-sec-h">{h}</h3>}
+            {ps.map((p, i) => <p key={i} style={{ "--i": n++ }}>{p}</p>)}
+            {labelled && h === "Available options" && tiles && <Tiles ids={a.actions || []} opts={opts} onOpen={onOpen} />}
+          </div>))}
+        {labelled && !todo.length && tiles && <div className="cz-sec"><h3 className="cz-sec-h">Available options</h3><Tiles ids={a.actions || []} opts={opts} onOpen={onOpen} /></div>}
+        {unc.length > 0 && <div className="cz-sec">{labelled && <h3 className="cz-sec-h">Not confirmed</h3>}<p className="cz-unc" style={{ "--i": n }}><Info size={15} aria-hidden="true" /><span>{unc.join(" ")}</span></p></div>}
         <time className="cz-time">{clock(m.at)}</time>
       </div>
       <div className="cz-meta">
@@ -153,12 +167,12 @@ function Answer({ m, opts, onOpen, onInspect }) {
         <span className={"cz-mode" + (res.mode === "live" ? " live" : "")}>{res.mode === "live" ? "Live AI" : res.mode === "provider_down" && (res.reason === "rate_limited" || res.reason === "busy") ? "Rule-based · AI limit reached" : res.mode === "provider_down" ? "Rule-based · AI unavailable" : res.mode === "fallback" ? "Rule-based · AI draft didn't pass checks" : res.mode === "demo" ? "Rule-based · verified sources" : res.mode === "guard" ? "Safety guard" : res.mode === "offline" ? "Offline" : "Safe reply"}</span>
       </div>
       {srcIds.length > 0 && (
-        <div className={"glass cz-srcs" + (srcOpen ? " open" : "")}>
+        <div className={"cz-srcs" + (srcOpen ? " open" : "")}>
           <button type="button" aria-expanded={srcOpen} aria-controls={"src-" + m.id} onClick={() => setSrcOpen(!srcOpen)}><span>Sources <em>({srcIds.length})</em></span><ChevronDown size={18} aria-hidden="true" /></button>
           <Reveal open={srcOpen} id={"src-" + m.id}><SourceList ids={srcIds} /></Reveal>
         </div>
       )}
-      {!m.stale && <Tiles ids={a.actions || []} opts={opts} onOpen={onOpen} />}
+      {!labelled && !m.stale && <Tiles ids={a.actions || []} opts={opts} onOpen={onOpen} />}
     </div>
   );
 }
@@ -233,10 +247,11 @@ export function Conversation({ s, v, tl, opts, chat, busy, sugg, onAsk, onOpen, 
       <div className="cz-log" ref={logRef} role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation with SIP Companion">
         {fresh ? (
           <div className="cz-hero">
-            <Orb size={showCard ? 92 : 120} state="hello" halo />
-            <h2 className="cz-hello">Hi! I'm your<br />SIP Companion</h2>
-            <p className="cz-sub">Ask me anything about your SIP in your own words: missed payments, dates, your options, or how SIPs work.</p>
             {showCard && <SipCard s={s} v={v} tl={tl} open={ctxOpen} onToggle={() => setCtxOpen(!ctxOpen)} onDetails={onDetails} />}
+            <div className="cz-intro">
+              <h2 className="cz-hello">Ask about this SIP</h2>
+              <p className="cz-sub">Missed instalments, dates, your options or how SIPs work, in your own words.</p>
+            </div>
             <div className="cz-chips" role="group" aria-label="Suggested questions">
               {sugg.map((t, i) => <button key={t} type="button" style={{ "--i": i }} onClick={() => send(t)}>{t}</button>)}
               <button type="button" className="alt" style={{ "--i": sugg.length }} onClick={onExplore}><Shuffle size={14} aria-hidden="true" />{EXPLORE}</button>

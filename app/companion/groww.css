@@ -1,0 +1,222 @@
+/* SIP Companion · Groww-inspired visual layer (frontend only).
+   Loaded after cx.css and chat.css. Shared tokens and components for the mobile app and desktop web layouts.
+   Neutral surfaces, one restrained green for primary and selected states, subtle borders, no glass or gradients.
+   Independent case-study prototype: no Groww logo, fonts or other proprietary assets are used. */
+
+.cx.cz{
+  --bg:#FFFFFF;--surface:#FFFFFF;--card:#F5F6F8;--ink:#1B1D29;--mute:#44475B;--faint:#6B6E7D;--rule:#E1E3E8;--rule2:#ECEEF1;
+  --acc:#007A59;--acc-2:#006B4E;--acc-soft:#E7F4EE;--on-acc:#FFFFFF;
+  --ok:#007A59;--ok-soft:#E7F4EE;--warn:#8A5000;--warn-soft:#FCF1DE;--bad:#B4233A;--bad-soft:#FBE8EB;--info:#1D5FB8;--info-soft:#EAF1FB;
+  --vio:var(--acc);--vio-d:var(--ink);--head:var(--ink);--lav:var(--acc-soft);--lav2:var(--card);
+  --glass:var(--surface);--glass-b:var(--rule);--glass-line:var(--rule2);--soft:none;--stage:var(--card);
+  --shadow:0 1px 2px rgba(16,24,40,.05);--r:12px;
+  background:var(--stage)
+}
+:root[data-theme="dark"] .cx.cz{
+  --bg:#121317;--surface:#1A1C22;--card:#121317;--ink:#ECEDF1;--mute:#C3C5CE;--faint:#9A9DA9;--rule:#2C2F38;--rule2:#24262E;
+  --acc:#3CC59A;--acc-2:#5BD3AC;--acc-soft:#173229;--on-acc:#0B1A14;
+  --ok:#3CC59A;--ok-soft:#173229;--warn:#F0B35A;--warn-soft:#352813;--bad:#F07A8C;--bad-soft:#3A1C22;--info:#8DB6F2;--info-soft:#1A2638;
+  --vio:var(--acc);--vio-d:var(--ink);--head:var(--ink);--lav:var(--acc-soft);--lav2:var(--card);
+  --glass:var(--surface);--glass-b:var(--rule);--glass-line:var(--rule2);--soft:none;--stage:#0E0F12
+}
+
+/* ---------- remove decoration ---------- */
+.cz-blob,.cz-slab{display:none!important}
+.cz-app,:root[data-theme="dark"] .cz-app{background:var(--surface)!important}
+.glass{background:var(--surface);border:1px solid var(--rule);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.cx.cz *{text-shadow:none}
+
+/* ---------- buttons (shared) ---------- */
+.cx.cz .cx-btn{border-radius:10px;font-weight:650;box-shadow:none}
+.cx.cz .cx-btn.solid{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+.cx.cz .cx-btn.solid:hover{background:var(--acc-2);border-color:var(--acc-2)}
+.cx.cz .cx-btn.ghost{background:var(--surface);border:1px solid var(--rule);color:var(--ink)}
+.cx.cz .cx-btn.ghost:hover{border-color:var(--ink)}
+.cx.cz .cx-btn:focus-visible,.cx.cz button:focus-visible,.cx.cz a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.cx.cz .cx-seg{border-radius:10px}
+.cx.cz .cx-demo-tag{background:var(--card);color:var(--mute);border:1px solid var(--rule);border-radius:6px;font-weight:650;letter-spacing:.02em;padding:3px 8px;font-size:.8125rem}
+
+/* ---------- assistant mark (replaces the glowing orb) ---------- */
+.cx.cz .orb{width:var(--o);height:var(--o);border-radius:50%;background:var(--acc-soft);color:var(--acc);display:inline-grid;place-items:center;flex:none}
+.cx.cz .orb.think{animation:gwPulse 1.2s ease-in-out infinite}
+.cx.cz .cz-row>.orb{width:28px;height:28px;margin-top:4px}
+
+/* ---------- headers ---------- */
+.cx.cz .cz-head2{background:var(--surface);border-bottom:1px solid var(--rule);padding:6px 8px;min-height:56px}
+.cx.cz .cz-head2.bare{padding:6px 8px;min-height:52px}
+.cx.cz .cz-idc{gap:1px}
+.cx.cz .cz-idc>b,.cx.cz .cz-head2>b{font-size:1rem;font-weight:700;color:var(--ink);margin:0;letter-spacing:0}
+.cx.cz .cz-subl,.cx.cz .cz-subl.btn{font-size:.8125rem;color:var(--mute);gap:6px;border-radius:6px}
+.cx.cz .cz-subl.btn:hover{background:var(--card);color:var(--ink)}
+.cz-dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--faint)}
+.cz-dot.t-ok{background:var(--ok)}.cz-dot.t-attention{background:var(--warn)}.cz-dot.t-info{background:var(--info)}
+.cx.cz .cz-hreset{color:var(--mute);align-self:center}.cx.cz .cz-hreset:hover{background:var(--card)!important;color:var(--ink)}
+.cx.cz .cz-headcard{background:var(--surface);padding:0 12px;border-bottom:1px solid transparent}
+.cx.cz .cz-headcard.open{padding:12px;border-bottom-color:var(--rule)}
+.cx.cz .cz-headcard .cz-sip{border:none;padding:0}
+
+/* ---------- SIP overview (shared component) ---------- */
+.cx.cz .cz-sip{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:16px;gap:10px;box-shadow:none}
+.cx.cz .cz-sip-top{align-items:flex-start}
+.cx.cz .cz-sip-k{font-size:.8125rem;font-weight:600;color:var(--faint)}
+.cx.cz .cz-sip-v,.cx.cz .cz-app .cz-sip-v{font-size:1.75rem;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.2;font-variant-numeric:tabular-nums}
+.cz-sip-f{font-size:.8125rem;color:var(--faint);margin-top:2px}
+.cx.cz .cz-tag{border-radius:6px;font-weight:650;letter-spacing:0;padding:4px 8px}
+.cx.cz .cz-sip-r{font-size:.9375rem;color:var(--ink);font-weight:600;line-height:1.4}
+.cz-sip-facts{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:12px;padding-top:12px;border-top:1px solid var(--rule2)}
+.cz-sip-facts div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cz-sip-facts dt{font-size:.8125rem;color:var(--faint)}
+.cz-sip-facts dd{margin:0;font-size:.9375rem;font-weight:650;color:var(--ink);font-variant-numeric:tabular-nums}
+.cx.cz .cz-meter{gap:3px}
+.cx.cz .cz-meter i{width:16px;height:6px;border-radius:2px;background:var(--rule)}
+.cx.cz .cz-meter em{font-size:.9375rem;color:var(--ink);font-weight:650;margin-left:6px}
+.cx.cz .cz-sip-t{color:var(--acc);font-weight:650;font-size:.875rem;min-height:40px;margin-bottom:-6px}
+.cx.cz .cz-sip-more{border-top:1px solid var(--rule2)}
+.cx.cz .cz-sip-more .cx-tl h3{font-size:.8125rem;color:var(--faint);font-weight:650}
+
+/* ---------- conversation ---------- */
+.cx.cz .cx-app-body,.cx.cz .cz-webmain{background:var(--card)}
+.cx.cz .cz-log{gap:14px;padding:12px 14px 12px}
+.cx.cz .cz-hero{margin-block:0 auto;align-items:stretch;text-align:left;gap:14px;padding:4px 0 8px;max-width:600px}
+.cx.cz .cz-hero>*{animation:czIn .35s ease-out both}
+.cz-intro{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+.cx.cz .cz-hello,.cx.cz .cz-app .cz-hello,.cx.cz .cz-webapp .cz-hello{font-size:1.0625rem;font-weight:700;letter-spacing:0;line-height:1.3;color:var(--ink)}
+.cx.cz .cz-sub{font-size:.9375rem;color:var(--mute);max-width:none}
+.cx.cz .cz-chips{justify-content:flex-start}
+.cx.cz .cz-chips button,.cx.cz .cz-follow button{background:var(--surface);border:1px solid var(--rule);color:var(--ink);font-weight:600;font-size:.875rem;border-radius:999px;padding:9px 14px;box-shadow:none;min-height:40px}
+.cx.cz .cz-chips button:hover,.cx.cz .cz-follow button:hover{transform:none;box-shadow:none;border-color:var(--acc);color:var(--acc)}
+.cx.cz .cz-chips button.alt,.cx.cz .cz-follow button.alt{background:transparent;border:1px solid transparent;color:var(--acc);padding-inline:8px}
+.cx.cz .cz-chips button.alt:hover,.cx.cz .cz-follow button.alt:hover{border-color:transparent;text-decoration:underline}
+.cx.cz .cz-trust{max-width:none;font-size:.8125rem;color:var(--faint)}
+.cx.cz .cz-trust svg{color:var(--faint)}
+.cx.cz .cz-ai-note{margin-top:-6px}
+
+.cx.cz .cz-bubble{border-radius:12px;font-size:.9375rem}
+.cx.cz .cz-bubble.me{background:var(--ink);color:#fff;box-shadow:none;border-bottom-right-radius:4px}
+:root[data-theme="dark"] .cx.cz .cz-bubble.me{background:#2C2F38}
+.cx.cz .cz-bubble.bot{background:var(--surface);border:1px solid var(--rule);box-shadow:none;border-top-left-radius:4px;padding:12px 14px 24px}
+.cx.cz .cz-bubble.event{background:var(--surface);border-color:color-mix(in srgb,var(--ok) 35%,var(--rule))}
+.cz-bubble.secs{gap:0!important}
+.cz-sec{display:flex;flex-direction:column;gap:6px}
+.cz-bubble.secs .cz-sec+.cz-sec{margin-top:10px;padding-top:10px;border-top:1px solid var(--rule2)}
+.cz-sec-h{margin:0;font-size:.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint)}
+.cz-bubble.secs .cz-unc{border-top:none;padding-top:0}
+.cz-sec .cz-tiles{margin-top:4px}
+.cx.cz .cz-unc{color:var(--mute)}
+
+.cx.cz .cz-verify{border:1px solid var(--rule);box-shadow:none;border-radius:6px;min-height:30px;padding:0 10px;font-weight:600}
+.cx.cz .cz-verify:hover{border-color:var(--ink)}
+.cx.cz .cz-mode{color:var(--faint)}
+.cx.cz .cz-mode.live{color:var(--acc)}
+.cx.cz .cz-srcs{background:var(--surface);border:1px solid var(--rule);border-radius:12px;box-shadow:none}
+.cx.cz .cz-srcs>button{min-height:44px;font-size:.875rem}
+.cx.cz .cz-src-list li{background:var(--card);border:none;border-radius:8px}
+.cx.cz .cz-src-list a{color:var(--acc)}
+
+/* option tiles: equal weight, so no option is pushed */
+.cx.cz .cz-tiles{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.cx.cz .cz-tiles button{flex-direction:row;justify-content:flex-start;text-align:left;min-height:48px;padding:10px 12px;border-radius:10px;border:1px solid var(--rule);background:var(--surface);box-shadow:none;font-weight:600;font-size:.875rem;color:var(--ink);gap:10px}
+.cx.cz .cz-tiles button:hover{transform:none;border-color:var(--acc)}
+.cx.cz .cz-tiles .ic{width:auto;height:auto;background:none;color:var(--acc);border-radius:0}
+.cx.cz .cz-tiles button.na{color:var(--faint)}
+.cx.cz .cz-tiles button.na .ic{background:none;color:var(--faint)}
+.cx.cz .cz-sits button{border:1px solid var(--rule);box-shadow:none;border-radius:10px}
+.cx.cz .cz-sits button svg{color:var(--acc)}
+.cx.cz .cz-sits button[aria-current="true"]{border-color:var(--acc)}
+
+.cx.cz .cz-typing{background:var(--surface);border:1px solid var(--rule);box-shadow:none;border-radius:12px}
+.cx.cz .cz-typing .dots i{background:var(--acc)}
+
+/* ---------- composer ---------- */
+.cx.cz .cz-dock{background:var(--surface);border-top:1px solid var(--rule);padding-top:10px}
+.cx.cz .cz-compose{border:1px solid var(--rule);border-radius:12px;box-shadow:none;background:var(--surface)}
+.cx.cz .cz-compose:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+.cx.cz .cz-send{background:var(--acc);border-radius:10px;box-shadow:none;color:var(--on-acc)}
+.cx.cz .cz-send:disabled{background:var(--rule2);color:var(--faint)}
+.cx.cz .cz-mic{background:var(--card);color:var(--mute);border-radius:10px}
+.cx.cz .cz-ac{border:1px solid var(--rule);border-radius:12px;box-shadow:0 -8px 24px rgba(16,24,40,.08)}
+.cx.cz .cz-ac-i svg{color:var(--faint)}
+.cx.cz .cz-ac-i:hover,.cx.cz .cz-ac-i.on{background:var(--card)}
+
+/* ---------- review sheet (shared) ---------- */
+.cx.cz .cx-sheet{border-radius:16px 16px 0 0}
+.cx.cz .cx-web .cx-sheet,.cx.cz .cz-webapp .cx-sheet{border-radius:16px;max-width:560px}
+.cx.cz .cx-sheet-h{border-bottom:1px solid var(--rule2);padding:8px 6px}
+.cx.cz .cx-sheet-h h3{font-size:1rem}
+.cx.cz .cx-sheet-b{padding:14px 18px 14px;gap:12px}
+.cx-now{display:flex;flex-direction:column;gap:6px}
+.cx-now h4,.cx-rows-h{margin:0;font-size:.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint)}
+.cx-rows-h{margin-top:4px}
+.cx-now .cx-sum{background:var(--card);border-color:var(--rule2)}
+.cx.cz .cx-sum{border-radius:10px}
+.cx.cz .cx-sum div{grid-template-columns:132px 1fr}
+.cx.cz .cx-sum dt{font-weight:600}
+.cx.cz .cx-sim{border-radius:10px}
+.cx.cz .cx-srclink{color:var(--acc)}
+.cx.cz .cx-days button[aria-checked="true"]{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+.cx.cz .cx-quick button[aria-pressed="true"]{border-color:var(--acc);color:var(--acc);background:var(--acc-soft)}
+.cx.cz .cx-done svg{color:var(--ok)}
+
+/* ---------- desktop web product ---------- */
+.cx.cz .cz-stage.web{padding:0;background:var(--surface)}
+.cx.cz .cz-webapp,:root[data-theme="dark"] .cx.cz .cz-webapp{max-width:none;border-radius:0;border:none;box-shadow:none;background:var(--surface)}
+.cx.cz .cz-appnav{height:56px;gap:16px;padding:0 max(24px,calc((100% - 1320px)/2));border-bottom:1px solid var(--rule)}
+.cx.cz .cz-brand{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;color:var(--ink)}
+.cz-navnote{font-size:.8125rem;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cx.cz .cz-webgrid{width:100%;max-width:1320px;margin:0 auto;border-inline:1px solid var(--rule2)}
+.cx.cz .cz-webgrid.rail{grid-template-columns:380px minmax(0,1fr)}
+.cx.cz .cz-panel{margin:0;border-radius:0;border:none;border-right:1px solid var(--rule);box-shadow:none;background:var(--surface);padding:20px;gap:20px;max-height:none;height:100%;align-self:stretch;overflow-y:auto}
+.cz-panel-opts{display:flex;flex-direction:column;gap:10px}
+.cx.cz .cz-panel h2{font-size:.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint)}
+.cx.cz .cz-panel-acts{gap:8px}
+.cx.cz .cz-panel-acts button{justify-content:flex-start;gap:10px;min-height:48px;border-radius:10px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);font-weight:600;font-size:.9375rem;padding:0 12px;box-shadow:none}
+.cx.cz .cz-panel-acts button span{flex:1;text-align:left}
+.cx.cz .cz-panel-acts button svg{color:var(--acc)}
+.cx.cz .cz-panel-acts button svg:last-child{color:var(--faint)}
+.cx.cz .cz-panel-acts button:hover{border-color:var(--acc);color:var(--ink)}
+.cx.cz .cz-panel-n{font-size:.8125rem;color:var(--faint)}
+.cx.cz .cz-head2.web{padding:8px 24px;min-height:56px}
+.cx.cz .cz-webapp .cz-log{padding:20px max(24px,calc((100% - 760px)/2)) 16px}
+.cx.cz .cz-webapp .cz-hero{max-width:none}
+.cx.cz .cz-webapp .cz-dock{padding:10px max(24px,calc((100% - 760px)/2)) 12px}
+.cx.cz .cz-webapp .cz-me{max-width:70%}
+
+/* app preview frame on desktop (secondary): plain device outline, no glow */
+.cx.cz .cz-stage.app{background:var(--card)}
+.cx.cz .cx-phone{box-shadow:0 0 0 1px var(--rule),0 12px 32px rgba(16,24,40,.10)}
+
+/* ---------- preview bar ---------- */
+.cx.cz .cz-bar{border-bottom:1px solid var(--rule)}
+.cx.cz .cz-built{color:var(--acc)!important}
+
+/* ---------- mobile ---------- */
+@media (max-width:759px){
+  .cx.cz .cz-log{padding:12px 12px}
+  .cx.cz .cz-sip-v,.cx.cz .cz-app .cz-sip-v{font-size:1.625rem}
+  .cx.cz .cz-dock{padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:399px){
+  .cx.cz .cz-tiles{grid-template-columns:1fr 1fr}
+  .cx.cz .cx-sum div{grid-template-columns:1fr;gap:2px}
+  .cz-sip-facts{grid-template-columns:1fr 1fr}
+}
+@media (max-width:1279px){.cz-navnote{display:none}}
+
+/* fixes after first QA pass */
+.cx.cz .cz-meter i.on{background:var(--warn)}
+.cx.cz .t-info .cz-meter i.on{background:var(--info)}
+.cz-sec-h,.cx-now h4,.cx-rows-h,.cx.cz .cx-sheet-h h3,.cx.cz .cx-explain h4,.cx.cz .cz-hello,.cx.cz .cz-panel h2{font-family:var(--body,inherit)}
+.cx.cz .cz-subl.btn{white-space:normal;text-align:center;line-height:1.35;overflow:visible}
+.cx.cz .cz-subl.btn .cz-dot{align-self:center}
+
+/* site top bar, on the Companion page only: solid and neutral, the prototype's own mark in the same green */
+body:has(.cx.cz) .topbar{background:var(--paper);backdrop-filter:none}
+body:has(.cx.cz) .brand-mark rect{fill:#007A59}
+body:has(.cx.cz) .brand-mark circle{display:none}
+
+.cx.cz .cx-sheet-b>*{flex-shrink:0}
+
+.cx.cz .cx-toast{border-radius:10px;line-height:1.35;padding:10px 16px;max-width:calc(100% - 32px);text-align:center}
+
+@keyframes gwPulse{0%,100%{opacity:1}50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.cx.cz .orb.think{animation:none}}

@@ -108,6 +108,11 @@ export default function Flow({ flow, s, view, onClose, onConfirm, onOpen, onAsk,
     body = (<>
       {k === "PAY_MISSED" && <p className="cx-lead">Only pay if the money is comfortably there. Skipping the next instalment or lowering the amount are fine choices too.</p>}
       {k === "STOP" && <p className="cx-lead">Here's exactly what stopping does, so you can decide.</p>}
+      <section className="cx-now" aria-labelledby="cx-now-h">
+        <h4 id="cx-now-h">Your SIP now</h4>
+        <Rows rows={[["Monthly amount", inr(s.amount)], ["Instalment day", ordinal(s.day) + " of each month"], ["Missed in a row", n + " of 3"], ["Next instalment", nx ? fmtDay(nx) : "None"]]} />
+      </section>
+      <h4 className="cx-rows-h">If you confirm</h4>
       <Rows rows={rows} />
       <div className="cx-srcrow"><Src id={src} />{k === "STOP" && <Src id="CANCEL_FINAL" />}</div>
       <p className="cx-sim"><Info size={16} aria-hidden="true" />Simulation: confirming changes this demo only. No money moves and no real SIP changes.</p>

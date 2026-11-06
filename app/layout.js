@@ -3,6 +3,7 @@ import "./companion/companion.css";
 import "./companion/app.css";
 import "./companion/cx.css";
 import "./companion/chat.css";
+import "./companion/groww.css";
 import "./engine/engine.css";
 import "./research/research.css";
 import { headers } from "next/headers";
@@ -14,7 +15,7 @@ const META = {
 };
 async function site() { return (await headers()).get("x-site") === "engine" ? "engine" : "prototype"; }
 export async function generateMetadata() { return META[await site()]; }
-export const viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
+export const viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", interactiveWidget: "resizes-content" };
 
 export default async function RootLayout({ children }) {
   const which = await site();
