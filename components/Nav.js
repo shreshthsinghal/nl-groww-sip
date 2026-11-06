@@ -16,7 +16,7 @@ const SITES = {
 
 // The case study's original Groww-style mark (violet tile, rising line, pink dot). Not Groww's real logo.
 function Mark() {
-  return <svg className="brand-mark" width="24" height="24" viewBox="0 0 56 56" aria-hidden="true" focusable="false"><rect width="56" height="56" rx="16" fill="#4127A0" /><polyline points="12,38 22,28 29,33 42,18" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="42" cy="18" r="5" fill="#FF7A8E" /></svg>;
+  return <svg className="brand-mark" width="24" height="24" viewBox="0 0 56 56" aria-hidden="true" focusable="false"><rect width="56" height="56" rx="16" fill="#007A59" /><polyline points="12,38 22,28 29,33 42,18" fill="none" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
 
 export default function Nav({ site = "prototype" }) {
